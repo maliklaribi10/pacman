@@ -1,17 +1,19 @@
 import pygame
 
+
 def display_score():
     current_score = (pygame.time.get_ticks() - start) // 1000
     score_surface = test_font.render(f"Score: {current_score}", False, (64, 64, 64))
-    score_rectangle = score_surface.get_rect(center = (400, 50))
+    score_rectangle = score_surface.get_rect(center=(400, 50))
     screen.blit(score_surface, score_rectangle)
     return current_score
 
+
 pygame.init()
 screen = pygame.display.set_mode((800, 400))
-pygame.display.set_caption("Runner") # permet de changer le nom de la fenetre de jeu
+pygame.display.set_caption("Pac-Man")  # permet de changer le nom de la fenetre de jeu
 clock = pygame.time.Clock()
-test_font = pygame.font.Font("font/Pixeltype.ttf", 50) # nouvelle police d'ecriture et nouvelle taille de texte
+test_font = pygame.font.Font("font/Pixeltype.ttf", 50)  # nouvelle police d'ecriture et nouvelle taille de texte
 game_active = False
 start = pygame.time.get_ticks()
 score = 0
@@ -20,17 +22,17 @@ choice = 0
 # test_surface = pygame.Surface((100, 200)) # la surface que l'on veut rajouter de largeur 100 et de hauteur 200
 # test_surface.fill("Red") # Remplir la surface de rouge
 
-sky_surface = pygame.image.load("graphics/Sky.png").convert() # ajouter une image. Le convert sert a convertir tes image en une extention pygame prefere et facile dutilisation pour lui
+sky_surface = pygame.image.load("graphics/Sky.png").convert()  # ajouter une image. Le convert sert a convertir tes image en une extention pygame prefere et facile dutilisation pour lui
 ground_surface = pygame.image.load("graphics/ground.png").convert()
 
 # text_surface = test_font.render("My game", False, (64,64,64)) # permet de creer une surface ou il y a du texte
 # text_rectangle = text_surface.get_rect(center = (400, 50))
 
 snail_surface = pygame.image.load("graphics/snail/snail1.png").convert_alpha()
-snail_rectangle = snail_surface.get_rect(midbottom = (600, 300))
+snail_rectangle = snail_surface.get_rect(midbottom=(600, 300))
 
-player_surface = pygame.image.load("graphics/player/player_walk_1.png").convert_alpha()
-player_rectangle = player_surface.get_rect(midbottom = (80, 300)) # tu prend ta surface du joueur et tu creer un rectangle autour de lui, puis tu lui dis grace a quoi tu veux le placer ici cest en bas au milieu du coup cest grace a la position en bas au milieu quon va placer le bonhomme
+player_surface = pygame.image.load("graphics/Player/player_walk_1.png").convert_alpha()
+player_rectangle = player_surface.get_rect(midbottom=(80, 300))  # tu prend ta surface du joueur et tu creer un rectangle autour de lui, puis tu lui dis grace a quoi tu veux le placer ici cest en bas au milieu du coup cest grace a la position en bas au milieu quon va placer le bonhomme
 player_gravity = 0
 
 # player_stand = pygame.image.load("graphics/player/player_stand.png").convert_alpha()
@@ -38,16 +40,16 @@ player_gravity = 0
 # player_stand_rectangle = player_stand.get_rect(center = (400, 200))
 
 title_surface = test_font.render("Astronauts Game", False, (64, 64, 64))
-title_rectangle = title_surface.get_rect(center = (400, 50))
+title_rectangle = title_surface.get_rect(center=(400, 50))
 
 start_surface = test_font.render("Start Game", False, (64, 64, 64))
-start_rectangle = start_surface.get_rect(center = (400, 100))
+start_rectangle = start_surface.get_rect(center=(400, 100))
 
 option_surface = test_font.render("Options", False, (64, 64, 64))
-option_rectangle = option_surface.get_rect(center = (400, 200))
+option_rectangle = option_surface.get_rect(center=(400, 200))
 
 restart_surface = test_font.render("Press SPACE to run", False, (64, 64, 64))
-restart_rectangle = restart_surface.get_rect(center = (400, 330))
+restart_rectangle = restart_surface.get_rect(center=(400, 330))
 
 while True:
     for event in pygame.event.get():
@@ -100,7 +102,7 @@ while True:
         # screen.blit(text_surface, text_rectangle)
 
         snail_rectangle.x -= 4 # tu prend la position x de ton rectangle et tu enleve 4 pixel
-        if snail_rectangle.right <= 0: 
+        if snail_rectangle.right <= 0:
             snail_rectangle.left = 800
         screen.blit(snail_surface, snail_rectangle)
 
@@ -129,7 +131,7 @@ while True:
         else:
             screen.blit(score_message, score_message_rectangle)
 
-    
+
     # if player_rectangle.colliderect(snail_rectangle):
     #     print("ERROOOOOR")
 
