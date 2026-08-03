@@ -146,13 +146,13 @@ reste_y = 0
 verif_config()
 pacgum = create_pacgum(wall)
 while run:
+    for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                exit()
     count += 1
     # player = frames[count % 4]
     player = choose_dir(frames[count % 4], dir)
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            exit()
     clock.tick(30)
     keys = pygame.key.get_pressed()
     if keys[pygame.K_a] or keys[pygame.K_LEFT]:
