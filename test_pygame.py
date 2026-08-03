@@ -47,7 +47,7 @@ SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 1000
 WIDTH = 20
 HEIGHT = 20
-CELL_SIZE = SCREEN_WIDTH / WIDTH
+CELL_SIZE = SCREEN_WIDTH // WIDTH
 PACGUM = 5
 
 
@@ -73,7 +73,7 @@ def show_pacgum(pacgum: set[tuple[int, int]]):
         center_x = x * CELL_SIZE + CELL_SIZE / 2
         center_y = y * CELL_SIZE + CELL_SIZE / 2
 
-        objet = pygame.Surface((5,5))
+        objet = pygame.Surface((max(2, CELL_SIZE // 10),max(2, CELL_SIZE // 10)))
         objet_rect = objet.get_rect(center=(center_x, center_y))
 
         pygame.draw.rect(windows, "Orange", objet_rect)
@@ -153,6 +153,7 @@ while run:
     count += 1
     # player = frames[count % 4]
     player = choose_dir(frames[count % 4], dir)
+    player_rect = pygame.Rect(player_x, player_y, player.get_width(), player.get_height())
     clock.tick(30)
     keys = pygame.key.get_pressed()
     if keys[pygame.K_a] or keys[pygame.K_LEFT]:
@@ -198,8 +199,8 @@ while run:
             pass
         else:
             player_y += vitesse
-    X = int(ceil(player_x / CELL_SIZE - 1))
-    Y = int(ceil(player_y / CELL_SIZE - 1))
+    X = player_rect.centerx // CELL_SIZE
+    Y = player_rect.centery // CELL_SIZE
     reste_x = player_x % CELL_SIZE
     reste_y = player_y % CELL_SIZE
     # windows.blit(background, (0, 0))
