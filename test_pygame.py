@@ -3,6 +3,7 @@ from pygame.locals import QUIT, RESIZABLE
 from mazegenerator import MazeGenerator
 from math import ceil
 from typing import Any
+from random import randint
 
 
 def check(dir: int, wall: int) -> bool:
@@ -46,7 +47,36 @@ SCREEN_WIDTH = 1000
 SCREEN_HEIGHT = 1000
 WIDTH = 20
 HEIGHT = 20
-RECTANGLE = SCREEN_WIDTH / WIDTH
+CELL_SIZE = SCREEN_WIDTH / WIDTH
+PACGUM = 5
+
+
+def verif_config():
+    global PACGUM
+    if PACGUM >= WIDTH * HEIGHT - 18:
+        PACGUM = WIDTH * HEIGHT - 18
+
+
+def create_pacgum(maze_grid: list[list[int]]):
+    pacgum: set[tuple[int, int]] = set()
+
+    while len(pacgum) != PACGUM:
+        width = randint(0, WIDTH - 1)
+        height =  randint(0, HEIGHT - 1)
+        if maze_grid[height][width] != 15:
+            pacgum.add((width, height))
+
+    return pacgum
+
+def show_pacgum(pacgum: set[tuple[int, int]]):
+    for x, y in pacgum:
+        center_x = x * CELL_SIZE + CELL_SIZE / 2
+        center_y = y * CELL_SIZE + CELL_SIZE / 2
+
+        objet = pygame.Surface((5,5))
+        objet_rect = objet.get_rect(center=(center_x, center_y))
+
+        pygame.draw.rect(windows, "Orange", objet_rect)
 
 
 def show_maze():
@@ -55,24 +85,24 @@ def show_maze():
     for _ in range(len(wall[0])):
         horizontal_wall.fill("White")
         windows.blit(horizontal_wall, (surface_pos_x, surface_pos_y))
-        surface_pos_x += RECTANGLE
+        surface_pos_x += CELL_SIZE
     surface_pos_x = 0
     for _ in range(len(wall)):
         vertical_wall.fill("White")
         windows.blit(vertical_wall, (surface_pos_x, surface_pos_y))
-        surface_pos_y += RECTANGLE
-    surface_pos_y = RECTANGLE
+        surface_pos_y += CELL_SIZE
+    surface_pos_y = CELL_SIZE
     for i in wall:
         surface_pos_x = 0
         for element in i:
             if ((element >> 1) & 1) != 0:
                 vertical_wall.fill("White")
-                windows.blit(vertical_wall, (surface_pos_x + RECTANGLE, surface_pos_y - RECTANGLE))
+                windows.blit(vertical_wall, (surface_pos_x + CELL_SIZE, surface_pos_y - CELL_SIZE))
             if ((element >> 2) & 1) != 0:
                 horizontal_wall.fill("White")
                 windows.blit(horizontal_wall, (surface_pos_x, surface_pos_y))
-            surface_pos_x += RECTANGLE
-        surface_pos_y += RECTANGLE
+            surface_pos_x += CELL_SIZE
+        surface_pos_y += CELL_SIZE
 
 
 maze = MazeGenerator((WIDTH, HEIGHT))
@@ -81,8 +111,8 @@ wall = maze.maze
 print(wall)
 pygame.init()
 windows = pygame.display.set_mode((1010, 1010), RESIZABLE)
-vertical_wall = pygame.Surface((1, RECTANGLE))
-horizontal_wall = pygame.Surface((RECTANGLE, 1))
+vertical_wall = pygame.Surface((1, CELL_SIZE))
+horizontal_wall = pygame.Surface((CELL_SIZE, 1))
 vertical_wall.fill("White")
 horizontal_wall.fill("White")
 # show_maze()
@@ -113,13 +143,16 @@ clock = pygame.time.Clock()
 next_dir = 0
 reste_x = 0
 reste_y = 0
+verif_config()
+pacgum = create_pacgum(wall)
 while run:
     count += 1
     # player = frames[count % 4]
     player = choose_dir(frames[count % 4], dir)
     for event in pygame.event.get():
         if event.type == QUIT:
-            continuer = False
+            pygame.quit()
+            exit()
     clock.tick(30)
     keys = pygame.key.get_pressed()
     if keys[pygame.K_a] or keys[pygame.K_LEFT]:
@@ -150,7 +183,7 @@ while run:
             pass
         else:
             player_x -= vitesse
-    if dir == 13 and player_x < SCREEN_WIDTH - RECTANGLE + 10:
+    if dir == 13 and player_x < SCREEN_WIDTH - CELL_SIZE + 10:
         if (wall[Y][X] >> 1) & 1 == 1 and reste_x == 10 and reste_y == 10:
             pass
         else:
@@ -160,21 +193,28 @@ while run:
             pass
         else:
             player_y -= vitesse
-    if dir == 11 and player_y < SCREEN_HEIGHT - RECTANGLE + 10:
+    if dir == 11 and player_y < SCREEN_HEIGHT - CELL_SIZE + 10:
         if (wall[Y][X] >> 2) & 1 == 1 and reste_x == 10 and reste_y == 10:
             pass
         else:
             player_y += vitesse
-    X = int(ceil(player_x / RECTANGLE - 1))
-    Y = int(ceil(player_y / RECTANGLE - 1))
-    reste_x = player_x % RECTANGLE
-    reste_y = player_y % RECTANGLE
+    X = int(ceil(player_x / CELL_SIZE - 1))
+    Y = int(ceil(player_y / CELL_SIZE - 1))
+    reste_x = player_x % CELL_SIZE
+    reste_y = player_y % CELL_SIZE
     # windows.blit(background, (0, 0))
     # pygame.display.flip()
     # print(f"X={X} Y={Y}")
     print(f"X={player_x} Y={player_y} X={X} Y={Y} resteX={reste_x} restY= {reste_y} dir= {dir} cell= {wall[Y][X]}")
     windows.fill((0, 0, 0))
     show_maze()
+    show_pacgum(pacgum)
+    if (X, Y) in pacgum:
+        pacgum.remove((X, Y))
+        show_pacgum(pacgum)
+    if pacgum == set():
+        pygame.quit()
+        exit()
     windows.blit(player, (player_x, player_y))
     pygame.display.flip()
 pygame.quit()
