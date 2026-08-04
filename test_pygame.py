@@ -239,11 +239,11 @@ stop_current_game_rect = stop_current_game.get_rect(center=(SCREEN_WIDTH/2, 550)
 #     ]
 ghost_x = 960
 ghost_y = 960
-# ghost_frame = [
-#     pygame.transform.scale(pygame.image.load("ghost/f0.png").convert_alpha(), (32, 32)),
-#     pygame.transform.scale(pygame.image.load("ghost/f1.png").convert_alpha(), (32, 32))
-#     ]
-ghost_frame = pygame.transform.scale(pygame.image.load("ghost.gif").convert_alpha(), (32, 32))
+ghost_frame = [
+    pygame.transform.scale(pygame.image.load("ghost/f0.png").convert_alpha(), (32, 32)),
+    pygame.transform.scale(pygame.image.load("ghost/f1.png").convert_alpha(), (32, 32))
+    ]
+# ghost_frame = pygame.transform.scale(pygame.image.load("ghost.gif").convert_alpha(), (32, 32))
 g_vitesse = 5
 g_X = int(ghost_x / CELL_SIZE)
 g_Y = int(ghost_y / CELL_SIZE)
@@ -279,6 +279,7 @@ choice = 0
 pause = False
 bot_dir = [7, 11, 13, 14]
 life: int = 3
+level = 1
 while run:
     for event in pygame.event.get():
         if event.type == QUIT:
@@ -344,8 +345,8 @@ while run:
             continue
         count += 1
         player = choose_dir(frames[count % 4], dir)
-        #ghost = ghost_frame[count % 2]
-        ghost = ghost_frame
+        ghost = ghost_frame[count % 2]
+        # ghost = ghost_frame
         player_rect = pygame.Rect(player_x, player_y, player.get_width(), player.get_height())
         ghost_rect = pygame.Rect(ghost_x, ghost_y, ghost.get_width(), ghost.get_height())
         clock.tick(30)
@@ -437,8 +438,23 @@ while run:
             pacgum.remove((X, Y))
             show_pacgum(pacgum)
         if pacgum == set():
-            choice = 0
-            active_game = False
+            maze = MazeGenerator((WIDTH, HEIGHT))
+            maze.generate()
+            wall = maze.maze
+            ghost_x = 960
+            ghost_y = 960
+            g_X = int(ghost_x / CELL_SIZE)
+            g_Y = int(ghost_y / CELL_SIZE)
+            player_x = 460
+            X = int(player_x / CELL_SIZE)
+            player_y = 460
+            Y = int(player_y / CELL_SIZE)
+            vitesse = 5
+            next_dir = 0
+            g_next_dir = chase((X, Y), (g_X, g_Y), wall)
+            g_dir = 0
+            pacgum = create_pacgum(wall)
+            level += 1
         if X == g_X and Y == g_Y:
             player_x = 460
             player_y = 460
@@ -459,10 +475,13 @@ while run:
         life_text = font_text.render(f"Life: {life}", False, (64, 64, 64))
         life_rect = life_text.get_rect(midbottom=(SCREEN_WIDTH/2, 1050))
         windows.blit(life_text, life_rect)
+        current_level = font_text.render(f"Level: {level}", False, (64, 64, 64))
+        current_level_rect = current_level.get_rect(bottomleft=(5, 1050))
+        windows.blit(current_level, current_level_rect)
         pygame.display.flip()
     else:
         maze = MazeGenerator((WIDTH, HEIGHT))
-        maze.generate()
+        maze.generate(42)
         wall = maze.maze
         ghost_x = 960
         ghost_y = 960
