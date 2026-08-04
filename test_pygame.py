@@ -4,6 +4,73 @@ from mazegenerator import MazeGenerator
 from math import ceil
 from typing import Any
 from random import randint, seed
+from random import choice as rchoice
+
+
+def chase(
+        p_coor: tuple[int, int],
+        g_coor: tuple[int, int],
+        maze: list[list[int]]
+        ) -> int:
+    directions = [
+        (1, 0, -1),   # NORTH
+        (2, 1, 0),    # EAST
+        (4, 0, 1),    # SOUTH
+        (8, -1, 0),   # WEST
+    ]
+    to_visit: list[tuple[int, int]] = [g_coor]
+    index_to_visit = 0
+    parents_children: dict[tuple[int, int], tuple[int, int] | None] = {}
+    parents_children[g_coor] = None
+    voisin: tuple[int, int]
+    visited: set[tuple[int, int]] = {g_coor}
+
+    while index_to_visit < len(to_visit):
+        x, y = to_visit[index_to_visit]
+        index_to_visit += 1
+
+        if (x, y) == p_coor:
+            break
+
+        current_walls = maze[y][x]
+        for wall, x_dir, y_dir in directions:
+            nw_x = x + x_dir
+            nw_y = y + y_dir
+
+            voisin = (nw_x, nw_y)
+
+            if voisin in visited:
+                continue
+
+            if current_walls & wall:
+                continue
+
+            if not (0 <= nw_x < 20 and 0 <= nw_y < 20):  # a change avec width et height modulable
+                continue
+
+            # if (nw_x, nw_y) in ft_logo:
+            #     continue
+
+            visited.add(voisin)
+            parents_children[voisin] = (x, y)
+            to_visit.append(voisin)
+
+    path: list[tuple[int, int]] = []
+    current_position: tuple[int, int] | None = p_coor
+    while current_position is not None:
+        path.append(current_position)
+        current_position = parents_children[current_position]
+    path.reverse()
+    print(path)
+    print(g_coor)
+    if path[1][0] == g_coor[0] and path[1][1] == g_coor[1] - 1:
+        return 14
+    if path[1][0] == g_coor[0] + 1 and path[1][1] == g_coor[1]:
+        return 13
+    if path[1][0] == g_coor[0] and path[1][1] == g_coor[1] + 1:
+        return 11
+    if path[1][0] == g_coor[0] - 1 and path[1][1] == g_coor[1]:
+        return 7
 
 
 def check(dir: int, wall: int) -> bool:
@@ -165,15 +232,22 @@ sortie_rectangle = sortie.get_rect(center=(SCREEN_WIDTH/2, 800))
 #     pygame.image.load("d/pac2.png").convert_alpha(),
 #     pygame.image.load("d/pac3.png").convert_alpha()
 #     ]
+ghost_x = 960
+ghost_y = 960
+ghost_frame = pygame.transform.scale(pygame.image.load("ghost.gif").convert_alpha(), (32, 32))
+g_vitesse = 5
+g_X = int(ghost_x / CELL_SIZE)
+g_Y = int(ghost_y / CELL_SIZE)
+
 frames = []
 for i in range(4):
     frame = pygame.image.load(f"d/pac{i}.png").convert_alpha()
     frames.append(frame)
 # player = frames[0]
-player_x = 10
-X = int(player_x / 20 - 1)
-player_y = 10
-Y = int(player_y / 20 - 1)
+player_x = 460
+X = int(player_x / CELL_SIZE)
+player_y = 460
+Y = int(player_y / CELL_SIZE)
 vitesse = 5
 
 
@@ -183,14 +257,19 @@ sprite = 1
 count = 0
 clock = pygame.time.Clock()
 next_dir = 0
+g_next_dir = 0
+g_dir = 0
 reste_x = 0
 reste_y = 0
+g_reste_x = 0
+g_reste_y = 0
 verif_config()
 pacgum = create_pacgum(wall)
 active_game = False
 exit_game = False
 choice = 0
 pause = False
+bot_dir = [7, 11, 13, 14]
 while run:
     for event in pygame.event.get():
         if event.type == QUIT:
@@ -250,9 +329,10 @@ while run:
             pygame.display.update()
             continue
         count += 1
-        # player = frames[count % 4]
         player = choose_dir(frames[count % 4], dir)
+        ghost = ghost_frame
         player_rect = pygame.Rect(player_x, player_y, player.get_width(), player.get_height())
+        ghost_rect = pygame.Rect(ghost_x, ghost_y, ghost.get_width(), ghost.get_height())
         clock.tick(30)
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a] or keys[pygame.K_LEFT]:
@@ -298,13 +378,41 @@ while run:
                 pass
             else:
                 player_y += vitesse
+
+        g_next_dir = chase((X, Y), (g_X, g_Y), wall)
+        if check(g_next_dir, wall[g_Y][g_X]) and g_reste_x == 10 and g_reste_y == 10:
+            g_dir = g_next_dir
+        if g_dir == 7 and ghost_x > 10:
+            if (wall[g_Y][g_X] >> 3) & 1 == 1 and g_reste_x == 10 and g_reste_y == 10:
+                pass
+            else:
+                ghost_x -= g_vitesse
+        if g_dir == 13 and ghost_x < SCREEN_WIDTH - CELL_SIZE + 10:
+            if (wall[g_Y][g_X] >> 1) & 1 == 1 and g_reste_x == 10 and g_reste_y == 10:
+                pass
+            else:
+                ghost_x += g_vitesse
+        if g_dir == 14 and ghost_y > 10:
+            if (wall[g_Y][g_X] >> 0) & 1 == 1 and g_reste_x == 10 and g_reste_y == 10:
+                pass
+            else:
+                ghost_y -= g_vitesse
+        if g_dir == 11 and ghost_y < SCREEN_HEIGHT - CELL_SIZE + 10:
+            if (wall[g_Y][g_X] >> 2) & 1 == 1 and g_reste_x == 10 and g_reste_y == 10:
+                pass
+            else:
+                ghost_y += g_vitesse
         X = player_rect.centerx // CELL_SIZE
         Y = player_rect.centery // CELL_SIZE
         reste_x = player_x % CELL_SIZE
         reste_y = player_y % CELL_SIZE
+        g_X = ghost_rect.centerx // CELL_SIZE
+        g_Y = ghost_rect.centery // CELL_SIZE
+        g_reste_x = ghost_x % CELL_SIZE
+        g_reste_y = ghost_y % CELL_SIZE
+
         # windows.blit(background, (0, 0))
         # pygame.display.flip()
-        # print(f"X={X} Y={Y}")
         print(f"X={player_x} Y={player_y} X={X} Y={Y} resteX={reste_x} restY= {reste_y} dir= {dir} cell= {wall[Y][X]}")
         windows.fill((0, 0, 0))
         show_maze()
@@ -316,7 +424,13 @@ while run:
         if pacgum == set():
             choice = 0
             active_game = False
+        if player_x == ghost_x and player_y == ghost_y:
+            player_x = 60
+            player_y = 60
+            ghost_x = 960
+            ghost_y = 960
         windows.blit(player, (player_x, player_y))
+        windows.blit(ghost, (ghost_x, ghost_y))
         score_surface = font_text.render(f"{score}", False, (64, 64, 64))
         score_rect = score_surface.get_rect(bottomright=(990, 1050))
         windows.blit(score_surface, score_rect)
