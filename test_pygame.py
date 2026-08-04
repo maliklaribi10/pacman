@@ -63,8 +63,6 @@ def chase(
         path.append(current_position)
         current_position = parents_children[current_position]
     path.reverse()
-    print(path)
-    print(g_coor)
     if path[1][0] == g_coor[0] and path[1][1] == g_coor[1] - 1:
         return 14
     if path[1][0] == g_coor[0] + 1 and path[1][1] == g_coor[1]:
@@ -196,11 +194,9 @@ def show_maze():
         surface_pos_y += CELL_SIZE
 
 
-level = 1
-maze = MazeGenerator((WIDTH, HEIGHT), seed=4)
+maze = MazeGenerator((WIDTH, HEIGHT))
 maze.generate()
 wall = maze.maze
-print(wall)
 pygame.init()
 windows = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), RESIZABLE)
 vertical_wall = pygame.Surface((1, CELL_SIZE))
@@ -226,6 +222,12 @@ highscore_rectangle = highscore.get_rect(center=(SCREEN_WIDTH/2, 700))
 sortie = font.render("Exit", False, (64, 64, 64))
 sortie_rectangle = sortie.get_rect(center=(SCREEN_WIDTH/2, 800))
 
+resume = font.render("Resume", False, (64, 64, 64))
+resume_rectangle = resume.get_rect(center=(SCREEN_WIDTH/2, 480))
+
+stop_current_game = font.render("Main Menu", False, (64, 64, 64))
+stop_current_game_rect = stop_current_game.get_rect(center=(SCREEN_WIDTH/2, 550))
+
 # show_maze()
 # background = pygame.image.load("laby.png").convert()
 
@@ -237,10 +239,11 @@ sortie_rectangle = sortie.get_rect(center=(SCREEN_WIDTH/2, 800))
 #     ]
 ghost_x = 960
 ghost_y = 960
-ghost_frame = [
-    pygame.transform.scale(pygame.image.load("ghost/f0.png").convert_alpha(), (32, 32)),
-    pygame.transform.scale(pygame.image.load("ghost/f1.png").convert_alpha(), (32, 32))
-    ]
+# ghost_frame = [
+#     pygame.transform.scale(pygame.image.load("ghost/f0.png").convert_alpha(), (32, 32)),
+#     pygame.transform.scale(pygame.image.load("ghost/f1.png").convert_alpha(), (32, 32))
+#     ]
+ghost_frame = pygame.transform.scale(pygame.image.load("ghost.gif").convert_alpha(), (32, 32))
 g_vitesse = 5
 g_X = int(ghost_x / CELL_SIZE)
 g_Y = int(ghost_y / CELL_SIZE)
@@ -276,6 +279,7 @@ exit_game = False
 choice = 0
 pause = False
 bot_dir = [7, 11, 13, 14]
+life = 3
 while run:
     for event in pygame.event.get():
         if event.type == QUIT:
@@ -324,19 +328,25 @@ while run:
                     choice = -1
             if choice == 0 and event.key == pygame.K_RETURN and pause is True:
                 pause = False
+            if choice == -1 and event.key == pygame.K_RETURN and pause is True:
+                pause = False
+                active_game = False
     if active_game:
         if pause:
             windows.fill("Blue")
+            windows.blit(resume, resume_rectangle)
+            windows.blit(stop_current_game, stop_current_game_rect)
             if choice == 0:
-                pygame.draw.rect(windows, "Red", start_game_rectangle, 1)
+                pygame.draw.rect(windows, "Red", resume_rectangle, 1)
             if choice == -1:
-                pygame.draw.rect(windows, "Red", start_game_rectangle, -1)
-                pygame.draw.rect(windows, "Red", instruction_rectangle, 1)
+                pygame.draw.rect(windows, "Red", resume_rectangle, -1)
+                pygame.draw.rect(windows, "Red", stop_current_game_rect, 1)
             pygame.display.update()
             continue
         count += 1
         player = choose_dir(frames[count % 4], dir)
-        ghost = ghost_frame[count % 2]
+        #ghost = ghost_frame[count % 2]
+        ghost = ghost_frame
         player_rect = pygame.Rect(player_x, player_y, player.get_width(), player.get_height())
         ghost_rect = pygame.Rect(ghost_x, ghost_y, ghost.get_width(), ghost.get_height())
         clock.tick(30)
@@ -446,6 +456,23 @@ while run:
         windows.blit(score_surface, score_rect)
         pygame.display.flip()
     else:
+        maze = MazeGenerator((WIDTH, HEIGHT))
+        maze.generate()
+        wall = maze.maze
+        ghost_x = 960
+        ghost_y = 960
+        g_X = int(ghost_x / CELL_SIZE)
+        g_Y = int(ghost_y / CELL_SIZE)
+        player_x = 460
+        X = int(player_x / CELL_SIZE)
+        player_y = 460
+        Y = int(player_y / CELL_SIZE)
+        vitesse = 5
+        next_dir = 0
+        g_next_dir = chase((X, Y), (g_X, g_Y), wall)
+        g_dir = 0
+        pacgum = create_pacgum(wall)
+        score = 0
         main_menu()
     pygame.display.update()
 pygame.quit()
