@@ -503,6 +503,7 @@ while run:
         pacgum = create_pacgum(wall)
         score = 0
         life = 3
+        level = 1
         main_menu()
     pygame.display.update()
 pygame.quit()
