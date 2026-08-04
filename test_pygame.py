@@ -259,7 +259,6 @@ player_y = 460
 Y = int(player_y / CELL_SIZE)
 vitesse = 5
 
-
 run = True
 score = 0
 sprite = 1
@@ -279,7 +278,7 @@ exit_game = False
 choice = 0
 pause = False
 bot_dir = [7, 11, 13, 14]
-life = 3
+life: int = 3
 while run:
     for event in pygame.event.get():
         if event.type == QUIT:
@@ -449,11 +448,17 @@ while run:
             g_next_dir = 0
             dir = 0
             next_dir = 0
+            life = life - 1
+        if life == 0:
+            active_game = False
         windows.blit(player, (player_x, player_y))
         windows.blit(ghost, (ghost_x, ghost_y))
         score_surface = font_text.render(f"{score}", False, (64, 64, 64))
         score_rect = score_surface.get_rect(bottomright=(990, 1050))
         windows.blit(score_surface, score_rect)
+        life_text = font_text.render(f"Life: {life}", False, (64, 64, 64))
+        life_rect = life_text.get_rect(midbottom=(SCREEN_WIDTH/2, 1050))
+        windows.blit(life_text, life_rect)
         pygame.display.flip()
     else:
         maze = MazeGenerator((WIDTH, HEIGHT))
@@ -473,6 +478,7 @@ while run:
         g_dir = 0
         pacgum = create_pacgum(wall)
         score = 0
+        life = 3
         main_menu()
     pygame.display.update()
 pygame.quit()
