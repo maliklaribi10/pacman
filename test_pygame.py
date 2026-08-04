@@ -117,6 +117,7 @@ WIDTH = 20
 HEIGHT = 20
 CELL_SIZE = SCREEN_WIDTH // WIDTH
 PACGUM = 5
+LEVEL = 3
 
 
 def main_menu():
@@ -147,12 +148,14 @@ def verif_config():
 
 def create_pacgum(maze_grid: list[list[int]]):
     pacgum: set[tuple[int, int]] = set()
+    seed(None)
 
     while len(pacgum) != PACGUM:
         width = randint(0, WIDTH - 1)
         height = randint(0, HEIGHT - 1)
         if maze_grid[height][width] != 15:
             pacgum.add((width, height))
+        continue
 
     return pacgum
 
@@ -455,6 +458,8 @@ while run:
             g_dir = 0
             pacgum = create_pacgum(wall)
             level += 1
+            if level > LEVEL:
+                active_game = False  # a changer pour mettre lecran de victoire
         if X == g_X and Y == g_Y:
             player_x = 460
             player_y = 460
