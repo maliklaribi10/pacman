@@ -18,6 +18,8 @@ def chase(
         (4, 0, 1),    # SOUTH
         (8, -1, 0),   # WEST
     ]
+    if p_coor == g_coor:
+        return 0
     to_visit: list[tuple[int, int]] = [g_coor]
     index_to_visit = 0
     parents_children: dict[tuple[int, int], tuple[int, int] | None] = {}
@@ -156,6 +158,7 @@ def create_pacgum(maze_grid: list[list[int]]):
 
     return pacgum
 
+
 def show_pacgum(pacgum: set[tuple[int, int]]):
     for x, y in pacgum:
         center_x = x * CELL_SIZE + CELL_SIZE / 2
@@ -234,7 +237,10 @@ sortie_rectangle = sortie.get_rect(center=(SCREEN_WIDTH/2, 800))
 #     ]
 ghost_x = 960
 ghost_y = 960
-ghost_frame = pygame.transform.scale(pygame.image.load("ghost.gif").convert_alpha(), (32, 32))
+ghost_frame = [
+    pygame.transform.scale(pygame.image.load("ghost/f0.png").convert_alpha(), (32, 32)),
+    pygame.transform.scale(pygame.image.load("ghost/f1.png").convert_alpha(), (32, 32))
+    ]
 g_vitesse = 5
 g_X = int(ghost_x / CELL_SIZE)
 g_Y = int(ghost_y / CELL_SIZE)
@@ -330,7 +336,7 @@ while run:
             continue
         count += 1
         player = choose_dir(frames[count % 4], dir)
-        ghost = ghost_frame
+        ghost = ghost_frame[count % 2]
         player_rect = pygame.Rect(player_x, player_y, player.get_width(), player.get_height())
         ghost_rect = pygame.Rect(ghost_x, ghost_y, ghost.get_width(), ghost.get_height())
         clock.tick(30)
@@ -424,11 +430,15 @@ while run:
         if pacgum == set():
             choice = 0
             active_game = False
-        if player_x == ghost_x and player_y == ghost_y:
-            player_x = 60
-            player_y = 60
+        if X == g_X and Y == g_Y:
+            player_x = 460
+            player_y = 460
             ghost_x = 960
             ghost_y = 960
+            g_dir = 0
+            g_next_dir = 0
+            dir = 0
+            next_dir = 0
         windows.blit(player, (player_x, player_y))
         windows.blit(ghost, (ghost_x, ghost_y))
         score_surface = font_text.render(f"{score}", False, (64, 64, 64))
