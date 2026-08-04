@@ -117,7 +117,7 @@ WIDTH = 20
 HEIGHT = 20
 CELL_SIZE = SCREEN_WIDTH // WIDTH
 PACGUM = 5
-LEVEL = 3
+LEVEL = 2
 
 
 def main_menu():
@@ -458,7 +458,7 @@ while run:
             g_dir = 0
             pacgum = create_pacgum(wall)
             level += 1
-            if level > LEVEL:
+            if level - 1 == LEVEL:
                 active_game = False  # a changer pour mettre lecran de victoire
         if X == g_X and Y == g_Y:
             player_x = 460
