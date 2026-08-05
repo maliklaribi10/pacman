@@ -4,6 +4,22 @@ from mazegenerator import MazeGenerator
 from typing import Any
 from random import randint, seed
 import sys
+import json
+from pydantic import Field, BaseModel
+
+
+class Json(BaseModel):
+    highscore_filename: str = Field(min_length=1, default="score.json")
+    level: int = Field(ge=10, default=10)
+    width: int = Field(ge=10, default=20)
+    height: int = Field(ge=10, default=20)
+    lives: int = Field(ge=1, default=3)
+    pacgum: int = Field(ge=1)
+    score_pacgum: int = Field(ge=1, default=10)
+    score_superpacgum: int = Field(ge=1, default=50)
+    "score_ghost": 200,
+    "seed": 42,
+    "max_time": 90
 
 
 def chase(
@@ -147,17 +163,13 @@ def main_menu():
 
 
 def verif_config():
+    file = {}
     if len(sys.argv) != 2:
         raise ValueError("Trop ou trop peu d'arguments")
     name_file = sys.argv[1]
     with open(name_file, "r") as f:
-        values = f.read().split("\n")
-    for i in range(1, len(values) - 1):
-        if values[i].strip().strip(',').startswith("#") and values[i].strip().strip(',').startswith("/"):
-            continue
-        else:
-            values[i] = values[i].strip().rstrip(',')
-    print(values)
+        file = json.load(f)
+
     global PACGUM
     if PACGUM >= WIDTH * HEIGHT - 18:
         PACGUM = WIDTH * HEIGHT - 18
