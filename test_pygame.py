@@ -20,7 +20,7 @@ class Json(BaseModel):
     score_superpacgum: int = Field(ge=1, default=50)
     score_ghost: int = Field(ge=1, default=200)
     seed: int = Field(ge=1, default=42)
-    max_time: int = Field(ge=90, default=90)
+    max_time: int = Field(ge=1, default=90)
 
     @model_validator(mode="after")
     def filename_validator(self) -> Self:
@@ -525,6 +525,7 @@ while run:
             pacgum = create_pacgum(wall)
             superpacgum = create_superpacgum(wall)
             level += 1
+            actual_time = int(time())
             if level - 1 == verif.level:
                 active_game = False  # a changer pour mettre lecran de victoire
         if X == g_X and Y == g_Y:
@@ -537,7 +538,7 @@ while run:
             dir = 0
             next_dir = 0
             verif.lives = verif.lives - 1
-        if verif.lives == 0:
+        if verif.lives == 0 or timer == 0:
             active_game = False
         windows.blit(player, (player_x, player_y))
         windows.blit(ghost, (ghost_x, ghost_y))
@@ -573,6 +574,7 @@ while run:
         score = 0
         verif.lives = 3
         level = 1
+        actual_time = int(time())
         main_menu()
     pygame.display.update()
 pygame.quit()
