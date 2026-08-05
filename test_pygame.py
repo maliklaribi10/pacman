@@ -1,11 +1,12 @@
 import pygame
 from pygame.locals import QUIT, RESIZABLE
 from mazegenerator import MazeGenerator
-from typing import Any
+from typing import Any, Self
 from random import randint, seed
 import sys
 import json
-from pydantic import Field, BaseModel
+from time import time
+from pydantic import Field, BaseModel, model_validator, ValidationError
 
 
 class Json(BaseModel):
@@ -17,9 +18,21 @@ class Json(BaseModel):
     pacgum: int = Field(ge=1)
     score_pacgum: int = Field(ge=1, default=10)
     score_superpacgum: int = Field(ge=1, default=50)
-    "score_ghost": 200,
-    "seed": 42,
-    "max_time": 90
+    score_ghost: int = Field(ge=1, default=200)
+    seed: int = Field(ge=1, default=42)
+    max_time: int = Field(ge=90, default=90)
+
+    @model_validator(mode="after")
+    def filename_validator(self) -> Self:
+        if not self.highscore_filename.endswith(".json"):
+            raise ValueError("Votre fichier doit absolument etre un .json")
+        return self
+
+    @model_validator(mode="after")
+    def pacgum_validator(self) -> Self:
+        if self.pacgum > self.width * self.height - 22:
+            raise ValueError("Le nombre de pacgum est trop grand pour un labyrinthe de cette taille")
+        return self
 
 
 def chase(
@@ -126,20 +139,8 @@ def choose_dir(frame: Any, dir: int) -> Any:
     return frame
 
 
-WIDTH = 20
-HEIGHT = 20
-PACGUM = 42
-LEVEL = 10
-LIVES = 3
-SCORE_PACGUM = 10
-SCORE_SUPERPACGUM = 50
-SCORE_GHOST = 200
-SEED = 42
-MAX_TIME = 90
-HIGHSCORE_FILENAME = "highscore.json"
 SCREEN_WIDTH = 1001
 SCREEN_HEIGHT = 1050
-CELL_SIZE = SCREEN_WIDTH // WIDTH
 
 
 def main_menu():
@@ -169,20 +170,42 @@ def verif_config():
     name_file = sys.argv[1]
     with open(name_file, "r") as f:
         file = json.load(f)
+    valid_file = Json(**file)
+    return valid_file
 
-    global PACGUM
-    if PACGUM >= WIDTH * HEIGHT - 18:
-        PACGUM = WIDTH * HEIGHT - 18
+
+def create_superpacgum(maze_grid: list[list[int]]):
+    superpacgum: set[tuple[int, int]] = set()
+    seed(None)
+
+    superpacgum.add((0, 0))
+    superpacgum.add((verif.width - 1, 0))
+    superpacgum.add((0, verif.height - 1))
+    superpacgum.add((verif.width - 1, verif.height - 1))
+
+    return superpacgum
+
+
+def show_superpacgum(pacgum: set[tuple[int, int]]):
+    for x, y in pacgum:
+        center_x = x * CELL_SIZE + CELL_SIZE / 2
+        center_y = y * CELL_SIZE + CELL_SIZE / 2
+
+        objet = pygame.Surface((max(2, CELL_SIZE // 3), max(2, CELL_SIZE // 3)))
+        objet_rect = objet.get_rect(center=(center_x, center_y))
+
+        pygame.draw.rect(windows, "Orange", objet_rect, border_radius=40)
 
 
 def create_pacgum(maze_grid: list[list[int]]):
     pacgum: set[tuple[int, int]] = set()
     seed(None)
+    superpacgum = create_superpacgum(maze_grid)
 
-    while len(pacgum) != PACGUM:
-        width = randint(0, WIDTH - 1)
-        height = randint(0, HEIGHT - 1)
-        if maze_grid[height][width] != 15:
+    while len(pacgum) != verif.pacgum:
+        width = randint(0, verif.width - 1)
+        height = randint(0, verif.height - 1)
+        if maze_grid[height][width] != 15 and (width, height) not in superpacgum:
             pacgum.add((width, height))
         continue
 
@@ -226,7 +249,9 @@ def show_maze():
         surface_pos_y += CELL_SIZE
 
 
-maze = MazeGenerator((WIDTH, HEIGHT))
+verif = verif_config()
+CELL_SIZE = SCREEN_WIDTH // verif.width
+maze = MazeGenerator((verif.width, verif.height))
 maze.generate()
 wall = maze.maze
 pygame.init()
@@ -238,6 +263,7 @@ horizontal_wall.fill("White")
 font = pygame.font.Font("Pixeltype.ttf", 100)
 h1_font = pygame.font.Font("Pixeltype.ttf", 300)
 font_text = pygame.font.Font("Pixeltype.ttf", 50)
+time_font = pygame.font.Font("Pixeltype.ttf", 500)
 
 title_surface = h1_font.render("Pac-Man", False, "Red")
 title_rectangle = title_surface.get_rect(center=(SCREEN_WIDTH/2, 200))
@@ -303,8 +329,8 @@ reste_x = 0
 reste_y = 0
 g_reste_x = 0
 g_reste_y = 0
-verif_config()
 pacgum = create_pacgum(wall)
+superpacgum = create_superpacgum(wall)
 active_game = False
 exit_game = False
 choice = 0
@@ -312,28 +338,29 @@ pause = False
 bot_dir = [7, 11, 13, 14]
 life: int = 3
 level = 1
+actual_time = int(time())
 while run:
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
             exit()
         if event.type == pygame.KEYDOWN:
-            if choice == 0 and pause is False:
+            if choice == 0 and pause is False and active_game is False:
                 if event.key == pygame.K_UP:
                     choice = 0
                 if event.key == pygame.K_DOWN:
                     choice = -1
-            elif choice == -1 and pause is False:
+            elif choice == -1 and pause is False and active_game is False:
                 if event.key == pygame.K_UP:
                     choice = 0
                 if event.key == pygame.K_DOWN:
                     choice = -2
-            elif choice == -2 and pause is False:
+            elif choice == -2 and pause is False and active_game is False:
                 if event.key == pygame.K_UP:
                     choice = -1
                 if event.key == pygame.K_DOWN:
                     choice = -3
-            elif choice == -3 and pause is False:
+            elif choice == -3 and pause is False and active_game is False:
                 if event.key == pygame.K_UP:
                     choice = -2
                 if event.key == pygame.K_DOWN:
@@ -376,6 +403,7 @@ while run:
             pygame.display.update()
             continue
         count += 1
+        timer = verif.max_time + actual_time - int(time())
         player = choose_dir(frames[count % 4], dir)
         ghost = ghost_frame[count % 2]
         # ghost = ghost_frame
@@ -463,14 +491,23 @@ while run:
         # pygame.display.flip()
         # print(f"X={player_x} Y={player_y} X={X} Y={Y} resteX={reste_x} restY= {reste_y} dir= {dir} cell= {wall[Y][X]}")
         windows.fill((0, 0, 0))
+        timer_surface = time_font.render(f"{timer}", False, (64, 64, 64))
+        timer_rect = timer_surface.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
+        timer_surface.set_alpha(128)  # rendre transparent du texte 128 moitie de 256 donc 50% de transparence
+        windows.blit(timer_surface, timer_rect)
         show_maze()
         show_pacgum(pacgum)
+        show_superpacgum(superpacgum)
         if (X, Y) in pacgum:
-            score += 10
+            score += verif.score_pacgum
             pacgum.remove((X, Y))
             show_pacgum(pacgum)
-        if pacgum == set():
-            maze = MazeGenerator((WIDTH, HEIGHT))
+        if (X, Y) in superpacgum:
+            score += verif.score_superpacgum
+            superpacgum.remove((X, Y))
+            show_superpacgum(superpacgum)
+        if pacgum == set() and superpacgum == set():
+            maze = MazeGenerator((verif.width, verif.height))
             maze.generate()
             wall = maze.maze
             ghost_x = 960
@@ -486,8 +523,9 @@ while run:
             g_next_dir = chase((X, Y), (g_X, g_Y), wall)
             g_dir = 0
             pacgum = create_pacgum(wall)
+            superpacgum = create_superpacgum(wall)
             level += 1
-            if level - 1 == LEVEL:
+            if level - 1 == verif.level:
                 active_game = False  # a changer pour mettre lecran de victoire
         if X == g_X and Y == g_Y:
             player_x = 460
@@ -498,15 +536,15 @@ while run:
             g_next_dir = 0
             dir = 0
             next_dir = 0
-            life = life - 1
-        if life == 0:
+            verif.lives = verif.lives - 1
+        if verif.lives == 0:
             active_game = False
         windows.blit(player, (player_x, player_y))
         windows.blit(ghost, (ghost_x, ghost_y))
         score_surface = font_text.render(f"{score}", False, (64, 64, 64))
         score_rect = score_surface.get_rect(bottomright=(990, 1050))
         windows.blit(score_surface, score_rect)
-        life_text = font_text.render(f"Life: {life}", False, (64, 64, 64))
+        life_text = font_text.render(f"Life: {verif.lives}", False, (64, 64, 64))
         life_rect = life_text.get_rect(midbottom=(SCREEN_WIDTH/2, 1050))
         windows.blit(life_text, life_rect)
         current_level = font_text.render(f"Level: {level}", False, (64, 64, 64))
@@ -514,8 +552,8 @@ while run:
         windows.blit(current_level, current_level_rect)
         pygame.display.flip()
     else:
-        maze = MazeGenerator((WIDTH, HEIGHT))
-        maze.generate(42)
+        maze = MazeGenerator((verif.width, verif.height))
+        maze.generate(verif.seed)
         wall = maze.maze
         ghost_x = 960
         ghost_y = 960
@@ -531,8 +569,9 @@ while run:
         g_next_dir = chase((X, Y), (g_X, g_Y), wall)
         g_dir = 0
         pacgum = create_pacgum(wall)
+        superpacgum = create_superpacgum(wall)
         score = 0
-        life = 3
+        verif.lives = 3
         level = 1
         main_menu()
     pygame.display.update()

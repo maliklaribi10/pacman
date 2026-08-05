@@ -4,10 +4,10 @@
     "width": 20,
     "height": 20,
     "lives": 3,
-    "pacgum": 42,
+    "pacgum": 1,
     "score_pacgum": 10,
     "score_superpacgum": 50,
     "score_ghost": 200,
     "seed": 42,
-    "max_time": 90
+    "max_time": 120
 }
