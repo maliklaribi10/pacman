@@ -1,10 +1,9 @@
 import pygame
 from pygame.locals import QUIT, RESIZABLE
 from mazegenerator import MazeGenerator
-from math import ceil
 from typing import Any
 from random import randint, seed
-from random import choice as rchoice
+import sys
 
 
 def chase(
@@ -111,13 +110,20 @@ def choose_dir(frame: Any, dir: int) -> Any:
     return frame
 
 
-SCREEN_WIDTH = 1001
-SCREEN_HEIGHT = 1050
 WIDTH = 20
 HEIGHT = 20
+PACGUM = 42
+LEVEL = 10
+LIVES = 3
+SCORE_PACGUM = 10
+SCORE_SUPERPACGUM = 50
+SCORE_GHOST = 200
+SEED = 42
+MAX_TIME = 90
+HIGHSCORE_FILENAME = "highscore.json"
+SCREEN_WIDTH = 1001
+SCREEN_HEIGHT = 1050
 CELL_SIZE = SCREEN_WIDTH // WIDTH
-PACGUM = 5
-LEVEL = 2
 
 
 def main_menu():
@@ -141,6 +147,17 @@ def main_menu():
 
 
 def verif_config():
+    if len(sys.argv) != 2:
+        raise ValueError("Trop ou trop peu d'arguments")
+    name_file = sys.argv[1]
+    with open(name_file, "r") as f:
+        values = f.read().split("\n")
+    for i in range(1, len(values) - 1):
+        if values[i].strip().strip(',').startswith("#") and values[i].strip().strip(',').startswith("/"):
+            continue
+        else:
+            values[i] = values[i].strip().rstrip(',')
+    print(values)
     global PACGUM
     if PACGUM >= WIDTH * HEIGHT - 18:
         PACGUM = WIDTH * HEIGHT - 18
@@ -432,7 +449,7 @@ while run:
 
         # windows.blit(background, (0, 0))
         # pygame.display.flip()
-        print(f"X={player_x} Y={player_y} X={X} Y={Y} resteX={reste_x} restY= {reste_y} dir= {dir} cell= {wall[Y][X]}")
+        # print(f"X={player_x} Y={player_y} X={X} Y={Y} resteX={reste_x} restY= {reste_y} dir= {dir} cell= {wall[Y][X]}")
         windows.fill((0, 0, 0))
         show_maze()
         show_pacgum(pacgum)
@@ -498,6 +515,7 @@ while run:
         Y = int(player_y / CELL_SIZE)
         vitesse = 5
         next_dir = 0
+        dir = 0
         g_next_dir = chase((X, Y), (g_X, g_Y), wall)
         g_dir = 0
         pacgum = create_pacgum(wall)
