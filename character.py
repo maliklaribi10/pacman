@@ -1,0 +1,238 @@
+import pygame
+from typing import Any
+
+
+SCREEN_WIDTH = 1001
+SCREEN_HEIGHT = 1050
+
+
+class Character():
+    def __init__(self, x: int, y: int, CELL_SIZE: int):
+        self.x = x
+        self.y = y
+        self.X = int(x / CELL_SIZE)
+        self.Y = int(y / CELL_SIZE)
+        self.speed = 5
+        self.dir = 0
+        self.reX = x % CELL_SIZE
+        self.reY = y % CELL_SIZE
+        self.CELL_SIZE = CELL_SIZE
+        self.next_dir = 0
+        self.start_x = x
+        self.start_y = y
+
+    def check(self, dir: int, wall: int) -> bool:
+        if dir == 0:
+            return False
+        if (dir >> 0) & 1 == 0 and (wall >> 0) & 1 == 0:
+            return True
+        if (dir >> 1) & 1 == 0 and (wall >> 1) & 1 == 0:
+            return True
+        if (dir >> 2) & 1 == 0 and (wall >> 2) & 1 == 0:
+            return True
+        if (dir >> 3) & 1 == 0 and (wall >> 3) & 1 == 0:
+            return True
+        return False
+
+    def check_opposite(self, dir: int, next: int) -> bool:
+        if dir == 14 and next == 11:
+            return True
+        if dir == 11 and next == 14:
+            return True
+        if dir == 7 and next == 13:
+            return True
+        if dir == 13 and next == 7:
+            return True
+        return False
+
+    def reset(self) -> None:
+        self.x = self.start_x
+        self.y = self.start_y
+        self.X = int(self.start_x / self.CELL_SIZE)
+        self.Y = int(self.start_y / self.CELL_SIZE)
+        self.dir = 0
+        self.reX = self.start_x % self.CELL_SIZE
+        self.reY = self.start_y % self.CELL_SIZE
+        self.CELL_SIZE = self.CELL_SIZE
+        self.next_dir = 0
+
+
+class Pacman(Character):
+    def __init__(self, x: int, y: int, CELL_SIZE: int):
+        super().__init__(x, y, CELL_SIZE)
+        self.frames = [
+            pygame.image.load("d/pac0.png").convert_alpha(),
+            pygame.image.load("d/pac1.png").convert_alpha(),
+            pygame.image.load("d/pac2.png").convert_alpha(),
+            pygame.image.load("d/pac3.png").convert_alpha()
+            ]
+        self.sprite = self.frames[0]
+        self.rect = pygame.Rect(self.x, self.y, self.sprite.get_width(), self.sprite.get_height())
+
+    @staticmethod
+    def choose_dir(frame: Any, dir: int) -> Any:
+        if dir == 7:
+            frame = pygame.transform.rotate(frame, 180)
+        if dir == 11:
+            frame = pygame.transform.rotate(frame, 270)
+        if dir == 13 or dir == 0:
+            frame = frame
+        if dir == 14:
+            frame = pygame.transform.rotate(frame, 90)
+        return frame
+
+    def move(self, next_dir: int, wall: list[list[int]]):
+        self.next_dir = next_dir
+        self.rect = pygame.Rect(self.x, self.y, self.sprite.get_width(), self.sprite.get_height())
+        if self.check_opposite(self.dir, self.next_dir):
+            self.dir = self.next_dir
+        if self.check(self.next_dir, wall[self.Y][self.X]) and self.reX == 10 and self.reY == 10:
+            self.dir = self.next_dir
+        if self.dir == 7 and self.x > 10:
+            if (wall[self.Y][self.X] >> 3) & 1 == 1 and self.reX == 10 and self.reY == 10:
+                pass
+            else:
+                self.x -= self.speed
+        if self.dir == 13 and self.x < SCREEN_WIDTH - self.CELL_SIZE + 10:
+            if (wall[self.Y][self.X] >> 1) & 1 == 1 and self.reX == 10 and self.reY == 10:
+                pass
+            else:
+                self.x += self.speed
+        if self.dir == 14 and self.y > 10:
+            if (wall[self.Y][self.X] >> 0) & 1 == 1 and self.reX == 10 and self.reY == 10:
+                pass
+            else:
+                self.y -= self.speed
+        if self.dir == 11 and self.y < SCREEN_HEIGHT - self.CELL_SIZE + 10:
+            if (wall[self.Y][self.X] >> 2) & 1 == 1 and self.reX == 10 and self.reY == 10:
+                pass
+            else:
+                self.y += self.speed
+        self.X = self.rect.centerx // self.CELL_SIZE
+        self.Y = self.rect.centery // self.CELL_SIZE
+        self.reX = self.x % self.CELL_SIZE
+        self.reY = self.y % self.CELL_SIZE
+
+
+class Ghost(Character):
+    def __init__(self, x: int, y: int, CELL_SIZE: int, color: str):
+        super().__init__(x, y, CELL_SIZE)
+        self.frames = [
+            pygame.transform.scale(pygame.image.load(f"ghost/{color}/f0.png").convert_alpha(), (32, 32)),
+            pygame.transform.scale(pygame.image.load(f"ghost/{color}/f1.png").convert_alpha(), (32, 32))
+            ]
+        self.sprite = self.frames[0]
+        self.rect = pygame.Rect(self.x, self.y, self.sprite.get_width(), self.sprite.get_height())
+        self.scared = 0
+        self.scared_frames = [
+            pygame.transform.scale(pygame.image.load("ghost/scared/f0.png").convert_alpha(), (32, 32)),
+            pygame.transform.scale(pygame.image.load("ghost/scared/f1.png").convert_alpha(), (32, 32)),
+            pygame.transform.scale(pygame.image.load("ghost/scared/f2.png").convert_alpha(), (32, 32)),
+            pygame.transform.scale(pygame.image.load("ghost/scared/f3.png").convert_alpha(), (32, 32)),
+            pygame.transform.scale(pygame.image.load("ghost/scared/f4.png").convert_alpha(), (32, 32)),
+            pygame.transform.scale(pygame.image.load("ghost/scared/f5.png").convert_alpha(), (32, 32)),
+            pygame.transform.scale(pygame.image.load("ghost/scared/f6.png").convert_alpha(), (32, 32)),
+            pygame.transform.scale(pygame.image.load("ghost/scared/f7.png").convert_alpha(), (32, 32))
+        ]
+
+    def chase(
+        self,
+        p_coor: tuple[int, int],
+        g_coor: tuple[int, int],
+        maze: list[list[int]]
+         ) -> int:
+        directions = [
+            (1, 0, -1),   # NORTH
+            (2, 1, 0),    # EAST
+            (4, 0, 1),    # SOUTH
+            (8, -1, 0),   # WEST
+        ]
+        if p_coor == g_coor:
+            return 0
+        to_visit: list[tuple[int, int]] = [g_coor]
+        index_to_visit = 0
+        parents_children: dict[tuple[int, int], tuple[int, int] | None] = {}
+        parents_children[g_coor] = None
+        voisin: tuple[int, int]
+        visited: set[tuple[int, int]] = {g_coor}
+
+        while index_to_visit < len(to_visit):
+            x, y = to_visit[index_to_visit]
+            index_to_visit += 1
+
+            if (x, y) == p_coor:
+                break
+
+            current_walls = maze[y][x]
+            for wall, x_dir, y_dir in directions:
+                nw_x = x + x_dir
+                nw_y = y + y_dir
+
+                voisin = (nw_x, nw_y)
+
+                if voisin in visited:
+                    continue
+
+                if current_walls & wall:
+                    continue
+
+                if not (0 <= nw_x < 20 and 0 <= nw_y < 20):  # a change avec width et height modulable
+                    continue
+
+                # if (nw_x, nw_y) in ft_logo:
+                #     continue
+
+                visited.add(voisin)
+                parents_children[voisin] = (x, y)
+                to_visit.append(voisin)
+
+        path: list[tuple[int, int]] = []
+        current_position: tuple[int, int] | None = p_coor
+        while current_position is not None:
+            path.append(current_position)
+            current_position = parents_children[current_position]
+        path.reverse()
+        # print(path)
+        # print(g_coor)
+        if path[1][0] == g_coor[0] and path[1][1] == g_coor[1] - 1:
+            return 14
+        if path[1][0] == g_coor[0] + 1 and path[1][1] == g_coor[1]:
+            return 13
+        if path[1][0] == g_coor[0] and path[1][1] == g_coor[1] + 1:
+            return 11
+        if path[1][0] == g_coor[0] - 1 and path[1][1] == g_coor[1]:
+            return 7
+
+    def move(self, X: int, Y: int, wall: list[list[int]]) -> None:
+        self.rect = pygame.Rect(self.x, self.y, self.sprite.get_width(), self.sprite.get_height())
+        self.next_dir = self.chase((X, Y), (self.X, self.Y), wall)
+        if self.check(self.next_dir, wall[self.Y][self.X]) and self.reX == 10 and self.reY == 10:
+            self.dir = self.next_dir
+        if self.dir == 7 and self.x > 10:
+            if (wall[self.Y][self.X] >> 3) & 1 == 1 and self.reX == 10 and self.reY == 10:
+                pass
+            else:
+                self.x -= self.speed
+        if self.dir == 13 and self.x < SCREEN_WIDTH - self.CELL_SIZE + 10:
+            if (wall[self.Y][self.X] >> 1) & 1 == 1 and self.reX == 10 and self.reY == 10:
+                pass
+            else:
+                self.x += self.speed
+        if self.dir == 14 and self.y > 10:
+            if (wall[self.Y][self.X] >> 0) & 1 == 1 and self.reX == 10 and self.reY == 10:
+                pass
+            else:
+                self.y -= self.speed
+        if self.dir == 11 and self.y < SCREEN_HEIGHT - self.CELL_SIZE + 10:
+            if (wall[self.Y][self.X] >> 2) & 1 == 1 and self.reX == 10 and self.reY == 10:
+                pass
+            else:
+                self.y += self.speed
+        self.X = self.rect.centerx // self.CELL_SIZE
+        self.Y = self.rect.centery // self.CELL_SIZE
+        self.reX = self.x % self.CELL_SIZE
+        self.reY = self.y % self.CELL_SIZE
+
+    def reset(self):
+        super().reset()
+        self.scared = 0
