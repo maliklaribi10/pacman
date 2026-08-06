@@ -21,7 +21,7 @@ class Json(BaseModel):
     score_superpacgum: int = Field(ge=1, default=50)
     score_ghost: int = Field(ge=1, default=200)
     seed: int = Field(ge=1, default=42)
-    max_time: int = Field(ge=1, default=90)
+    max_time: int = Field(ge=30, default=90)
 
     @model_validator(mode="after")
     def filename_validator(self) -> Self:
