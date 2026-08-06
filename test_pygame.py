@@ -283,10 +283,14 @@ while run:
         if keys[pygame.K_t]:
             run = False
         p1.move(next_dir, wall)
-        g1.move(p1.X, p1.Y, wall)
-        g2.move(p1.X, p1.Y, wall)
-        g3.move(p1.X, p1.Y, wall)
-        g4.move(p1.X, p1.Y, wall)
+        if g1.dead == 0:
+            g1.move(p1.X, p1.Y, wall)
+        if g2.dead == 0:
+            g2.move(p1.X, p1.Y, wall)
+        if g3.dead == 0:
+            g3.move(p1.X, p1.Y, wall)
+        if g4.dead == 0:
+            g4.move(p1.X, p1.Y, wall)
 
         windows.fill((0, 0, 0))
         timer_surface = time_font.render(f"{timer}", False, (64, 64, 64))
@@ -305,6 +309,9 @@ while run:
         if (p1.X, p1.Y) in superpacgum:
             score += verif.score_superpacgum
             g1.scared = 1
+            g2.scared = 1
+            g3.scared = 1
+            g4.scared = 1
             superpacgum.remove((p1.X, p1.Y))
             show_superpacgum(superpacgum)
 
@@ -324,56 +331,72 @@ while run:
             if level - 1 == verif.level:
                 active_game = False  # a changer pour mettre lecran de victoire
 
-        if p1.X == g1.X and p1.Y == g1.Y:
-            p1.reset()
-            g1.reset()
-            g2.reset()
-            g3.reset()
-            g4.reset()
-            next_dir = 0
-            verif.lives = verif.lives - 1
-        if p1.X == g2.X and p1.Y == g2.Y:
-            p1.reset()
-            g1.reset()
-            g2.reset()
-            g3.reset()
-            g4.reset()
-            next_dir = 0
-            verif.lives = verif.lives - 1
-        if p1.X == g3.X and p1.Y == g3.Y:
-            p1.reset()
-            g1.reset()
-            g2.reset()
-            g3.reset()
-            g4.reset()
-            next_dir = 0
-            verif.lives = verif.lives - 1
-        if p1.X == g4.X and p1.Y == g4.Y:
-            p1.reset()
-            g1.reset()
-            g2.reset()
-            g3.reset()
-            g4.reset()
-            next_dir = 0
-            verif.lives = verif.lives - 1
+        if p1.rect.colliderect(g1.rect):
+            if g1.scared == 0:
+                p1.reset()
+                g1.reset()
+                g2.reset()
+                g3.reset()
+                g4.reset()
+                next_dir = 0
+                verif.lives = verif.lives - 1
+            else:
+                g1.reset()
+        if p1.rect.colliderect(g2.rect):
+            if g2.scared == 0:
+                p1.reset()
+                g1.reset()
+                g2.reset()
+                g3.reset()
+                g4.reset()
+                next_dir = 0
+                verif.lives = verif.lives - 1
+            else:
+                g2.reset()
+        if p1.rect.colliderect(g3.rect):
+            if g3.scared == 0:
+                p1.reset()
+                g1.reset()
+                g2.reset()
+                g3.reset()
+                g4.reset()
+                next_dir = 0
+                verif.lives = verif.lives - 1
+            else:
+                g3.reset()
+        if p1.rect.colliderect(g4.rect):
+            if g4.scared == 0:
+                p1.reset()
+                g1.reset()
+                g2.reset()
+                g3.reset()
+                g4.reset()
+                next_dir = 0
+                verif.lives = verif.lives - 1
+            else:
+                g4.reset()
 
         if verif.lives == 0 or timer == 0:
             active_game = False
         windows.blit(p1.choose_dir(p1.frames[count % 4], p1.dir), (p1.x, p1.y))
-        if g1.scared == 0:
-            windows.blit(g1.frames[count % 2], (g1.x, g1.y))
-            windows.blit(g2.frames[count % 2], (g2.x, g2.y))
-            windows.blit(g3.frames[count % 2], (g3.x, g3.y))
-            windows.blit(g4.frames[count % 2], (g4.x, g4.y))
-        else:
-            windows.blit(g1.scared_frames[count % 8], (g1.x, g1.y))
-            windows.blit(g2.scared_frames[count % 8], (g2.x, g2.y))
-            windows.blit(g3.scared_frames[count % 8], (g3.x, g3.y))
-            windows.blit(g4.scared_frames[count % 8], (g4.x, g4.y))
+        # if g1.scared == 0:
+        #     windows.blit(g1.frames[count % 2], (g1.x, g1.y))
+        #     windows.blit(g2.frames[count % 2], (g2.x, g2.y))
+        #     windows.blit(g3.frames[count % 2], (g3.x, g3.y))
+        #     windows.blit(g4.frames[count % 2], (g4.x, g4.y))
+        # else:
+        #     windows.blit(g1.scared_frames[count % 8], (g1.x, g1.y))
+        #     windows.blit(g2.scared_frames[count % 8], (g2.x, g2.y))
+        #     windows.blit(g3.scared_frames[count % 8], (g3.x, g3.y))
+        #     windows.blit(g4.scared_frames[count % 8], (g4.x, g4.y))
+        g1.show(count, windows)
+        g2.show(count, windows)
+        g3.show(count, windows)
+        g4.show(count, windows)
         score_surface = font_text.render(f"{score}", False, (64, 64, 64))
         score_rect = score_surface.get_rect(bottomright=(990, 1050))
         windows.blit(score_surface, score_rect)
-        life_text = font_text.render(f"Life: {life}", False, (64, 64, 64))
+        life_text = font_text.render(f"Life: {verif.lives}", False, (64, 64, 64))
         life_rect = life_text.get_rect(midbottom=(SCREEN_WIDTH/2, 1050))
         windows.blit(life_text, life_rect)
         current_level = font_text.render(f"Level: {level}", False, (64, 64, 64))

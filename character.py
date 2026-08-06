@@ -1,5 +1,6 @@
 import pygame
 from typing import Any
+from pygame import Surface
 
 
 SCREEN_WIDTH = 1001
@@ -134,6 +135,7 @@ class Ghost(Character):
             pygame.transform.scale(pygame.image.load("ghost/scared/f6.png").convert_alpha(), (32, 32)),
             pygame.transform.scale(pygame.image.load("ghost/scared/f7.png").convert_alpha(), (32, 32))
         ]
+        self.dead = 0
 
     def chase(
         self,
@@ -233,6 +235,12 @@ class Ghost(Character):
         self.reX = self.x % self.CELL_SIZE
         self.reY = self.y % self.CELL_SIZE
 
-    def reset(self):
+    def reset(self) -> None:
         super().reset()
         self.scared = 0
+
+    def show(self, count: int, windows: Surface) -> None:
+        if self.scared == 1:
+            windows.blit(self.scared_frames[count % 8], (self.x, self.y))
+        else:
+            windows.blit(self.frames[count % 2], (self.x, self.y))
