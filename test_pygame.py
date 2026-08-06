@@ -6,7 +6,7 @@ from random import randint, seed
 import sys
 import json
 from time import time
-from pydantic import Field, BaseModel, model_validator, ValidationError
+from pydantic import Field, BaseModel, model_validator
 import character as char
 
 
@@ -200,6 +200,7 @@ pause = False
 life: int = 3
 level = 1
 actual_time = int(time())
+time_inv = 0
 p1 = char.Pacman(460, 460, CELL_SIZE)
 g1 = char.Ghost(960, 960, CELL_SIZE, "red")
 g2 = char.Ghost(10, 960, CELL_SIZE, "pink")
@@ -312,10 +313,15 @@ while run:
             g2.scared = 1
             g3.scared = 1
             g4.scared = 1
+            time_inv = int(time())
             superpacgum.remove((p1.X, p1.Y))
             show_superpacgum(superpacgum)
-
-        if pacgum == set() and superpacgum == set():
+        if int(time()) - time_inv == 5:
+            g1.scared = 0
+            g2.scared = 0
+            g3.scared = 0
+            g4.scared = 0
+        if pacgum == set():
             maze = MazeGenerator((verif.width, verif.height))
             maze.generate()
             wall = maze.maze
@@ -341,7 +347,6 @@ while run:
                 next_dir = 0
                 verif.lives = verif.lives - 1
             else:
-                score += verif.score_ghost
                 g1.reset()
         if p1.rect.colliderect(g2.rect):
             if g2.scared == 0:
@@ -353,7 +358,6 @@ while run:
                 next_dir = 0
                 verif.lives = verif.lives - 1
             else:
-                score += verif.score_ghost
                 g2.reset()
         if p1.rect.colliderect(g3.rect):
             if g3.scared == 0:
@@ -365,7 +369,6 @@ while run:
                 next_dir = 0
                 verif.lives = verif.lives - 1
             else:
-                score += verif.score_ghost
                 g3.reset()
         if p1.rect.colliderect(g4.rect):
             if g4.scared == 0:
@@ -377,22 +380,11 @@ while run:
                 next_dir = 0
                 verif.lives = verif.lives - 1
             else:
-                score += verif.score_ghost
                 g4.reset()
 
         if verif.lives == 0 or timer == 0:
             active_game = False
         windows.blit(p1.choose_dir(p1.frames[count % 4], p1.dir), (p1.x, p1.y))
-        # if g1.scared == 0:
-        #     windows.blit(g1.frames[count % 2], (g1.x, g1.y))
-        #     windows.blit(g2.frames[count % 2], (g2.x, g2.y))
-        #     windows.blit(g3.frames[count % 2], (g3.x, g3.y))
-        #     windows.blit(g4.frames[count % 2], (g4.x, g4.y))
-        # else:
-        #     windows.blit(g1.scared_frames[count % 8], (g1.x, g1.y))
-        #     windows.blit(g2.scared_frames[count % 8], (g2.x, g2.y))
-        #     windows.blit(g3.scared_frames[count % 8], (g3.x, g3.y))
-        #     windows.blit(g4.scared_frames[count % 8], (g4.x, g4.y))
         g1.show(count, windows)
         g2.show(count, windows)
         g3.show(count, windows)
