@@ -315,7 +315,7 @@ while run:
             superpacgum.remove((p1.X, p1.Y))
             show_superpacgum(superpacgum)
 
-        if pacgum == set():
+        if pacgum == set() and superpacgum == set():
             maze = MazeGenerator((verif.width, verif.height))
             maze.generate()
             wall = maze.maze
@@ -341,6 +341,7 @@ while run:
                 next_dir = 0
                 verif.lives = verif.lives - 1
             else:
+                score += verif.score_ghost
                 g1.reset()
         if p1.rect.colliderect(g2.rect):
             if g2.scared == 0:
@@ -352,6 +353,7 @@ while run:
                 next_dir = 0
                 verif.lives = verif.lives - 1
             else:
+                score += verif.score_ghost
                 g2.reset()
         if p1.rect.colliderect(g3.rect):
             if g3.scared == 0:
@@ -363,6 +365,7 @@ while run:
                 next_dir = 0
                 verif.lives = verif.lives - 1
             else:
+                score += verif.score_ghost
                 g3.reset()
         if p1.rect.colliderect(g4.rect):
             if g4.scared == 0:
@@ -374,6 +377,7 @@ while run:
                 next_dir = 0
                 verif.lives = verif.lives - 1
             else:
+                score += verif.score_ghost
                 g4.reset()
 
         if verif.lives == 0 or timer == 0:
