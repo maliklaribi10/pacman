@@ -178,10 +178,10 @@ highscore_rectangle = highscore.get_rect(center=(SCREEN_WIDTH/2, 700))
 sortie = font.render("Exit", False, (64, 64, 64))
 sortie_rectangle = sortie.get_rect(center=(SCREEN_WIDTH/2, 800))
 
-resume = font.render("Resume", False, (64, 64, 64))
+resume = font.render("Resume", False, "Yellow")
 resume_rectangle = resume.get_rect(center=(SCREEN_WIDTH/2, 480))
 
-stop_current_game = font.render("Main Menu", False, (64, 64, 64))
+stop_current_game = font.render("Main Menu", False, "Yellow")
 stop_current_game_rect = stop_current_game.get_rect(center=(SCREEN_WIDTH/2, 550))
 
 
@@ -201,6 +201,7 @@ life: int = 3
 level = 1
 actual_time = int(time())
 time_inv = 0
+pause_choice = 0
 p1 = char.Pacman(460, 460, CELL_SIZE)
 g1 = char.Ghost(960, 960, CELL_SIZE, "red")
 g2 = char.Ghost(10, 960, CELL_SIZE, "pink")
@@ -237,34 +238,33 @@ while run:
             if choice == -3 and event.key == pygame.K_RETURN and pause is False:
                 pygame.quit()
                 exit()
-            if event.key == pygame.K_ESCAPE:
+            if event.key == pygame.K_ESCAPE and active_game is True:
                 pause = True
                 if pause:
-                    choice = 0
+                    pause_pause_choice = 0
                     continue
-            if choice == 0 and pause is True:
+            if pause_choice == 0 and pause is True:
                 if event.key == pygame.K_UP:
-                    choice = 0
+                    pause_choice = 0
                 if event.key == pygame.K_DOWN:
-                    choice = -1
-            elif choice == -1 and pause is True:
+                    pause_choice = -1
+            elif pause_choice == -1 and pause is True:
                 if event.key == pygame.K_UP:
-                    choice = 0
+                    pause_choice = 0
                 if event.key == pygame.K_DOWN:
-                    choice = -1
-            if choice == 0 and event.key == pygame.K_RETURN and pause is True:
+                    pause_choice = -1
+            if pause_choice == 0 and event.key == pygame.K_RETURN and pause is True:
                 pause = False
-            if choice == -1 and event.key == pygame.K_RETURN and pause is True:
+            if pause_choice == -1 and event.key == pygame.K_RETURN and pause is True:
                 pause = False
                 active_game = False
     if active_game:
         if pause:
-            windows.fill("Blue")
             windows.blit(resume, resume_rectangle)
             windows.blit(stop_current_game, stop_current_game_rect)
-            if choice == 0:
-                pygame.draw.rect(windows, "Red", resume_rectangle, 1)
-            if choice == -1:
+            if pause_choice == 0:
+                resume.fill("Blue")
+            if pause_choice == -1:
                 pygame.draw.rect(windows, "Red", resume_rectangle, -1)
                 pygame.draw.rect(windows, "Red", stop_current_game_rect, 1)
             pygame.display.update()
@@ -321,7 +321,7 @@ while run:
             g2.scared = 0
             g3.scared = 0
             g4.scared = 0
-        if pacgum == set():
+        if pacgum == set() and superpacgum == set():
             maze = MazeGenerator((verif.width, verif.height))
             maze.generate()
             wall = maze.maze
@@ -347,6 +347,7 @@ while run:
                 next_dir = 0
                 verif.lives = verif.lives - 1
             else:
+                score += verif.score_ghost
                 g1.reset()
         if p1.rect.colliderect(g2.rect):
             if g2.scared == 0:
@@ -358,6 +359,7 @@ while run:
                 next_dir = 0
                 verif.lives = verif.lives - 1
             else:
+                score += verif.score_ghost
                 g2.reset()
         if p1.rect.colliderect(g3.rect):
             if g3.scared == 0:
@@ -369,6 +371,7 @@ while run:
                 next_dir = 0
                 verif.lives = verif.lives - 1
             else:
+                score += verif.score_ghost
                 g3.reset()
         if p1.rect.colliderect(g4.rect):
             if g4.scared == 0:
@@ -380,6 +383,7 @@ while run:
                 next_dir = 0
                 verif.lives = verif.lives - 1
             else:
+                score += verif.score_ghost
                 g4.reset()
 
         if verif.lives == 0 or timer == 0:
