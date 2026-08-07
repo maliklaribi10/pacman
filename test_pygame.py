@@ -12,7 +12,7 @@ import character as char
 
 class Json(BaseModel):
     highscore_filename: str = Field(min_length=1, default="score.json")
-    level: int = Field(ge=10, default=10)
+    level: int = Field(ge=1, default=10)
     width: int = Field(ge=10, default=20)
     height: int = Field(ge=10, default=20)
     lives: int = Field(ge=1, default=3)
@@ -42,23 +42,49 @@ SCREEN_HEIGHT = 1050
 
 
 def main_menu():
+    title_surface = h1_font.render("Pac-Man", False, "Red")
+    title_rectangle = title_surface.get_rect(center=(SCREEN_WIDTH/2, 200))
+
+    start_game = font.render("Start Game", False, (64, 64, 64))
+    start_game_rectangle = start_game.get_rect(center=(SCREEN_WIDTH/2, 500))
+
+    instruction = font.render("Instructions", False, (64, 64, 64))
+    instruction_rectangle = instruction.get_rect(center=(SCREEN_WIDTH/2, 600))
+
+    highscore = font.render("Highscore", False, (64, 64, 64))
+    highscore_rectangle = highscore.get_rect(center=(SCREEN_WIDTH/2, 700))
+
+    sortie = font.render("Exit", False, (64, 64, 64))
+    sortie_rectangle = sortie.get_rect(center=(SCREEN_WIDTH/2, 800))
+
+    if choice == 0:
+        start_game = font.render("Start Game", False, "Red")
+        instruction = font.render("Instructions", False, (64, 64, 64))
+        highscore = font.render("Highscore", False, (64, 64, 64))
+        sortie = font.render("Exit", False, (64, 64, 64))
+    if choice == -1:
+        start_game = font.render("Start Game", False, (64, 64, 64))
+        instruction = font.render("Instructions", False, "Red")
+        highscore = font.render("Highscore", False, (64, 64, 64))
+        sortie = font.render("Exit", False, (64, 64, 64))
+    if choice == -2:
+        start_game = font.render("Start Game", False, (64, 64, 64))
+        instruction = font.render("Instructions", False, (64, 64, 64))
+        highscore = font.render("Highscore", False, "Red")
+        sortie = font.render("Exit", False, (64, 64, 64))
+    if choice == -3:
+        start_game = font.render("Start Game", False, (64, 64, 64))
+        instruction = font.render("Instructions", False, (64, 64, 64))
+        highscore = font.render("Highscore", False, (64, 64, 64))
+        sortie = font.render("Exit", False, "Red")
+
     windows.fill("Yellow")
     windows.blit(start_game, start_game_rectangle)
     windows.blit(instruction, instruction_rectangle)
     windows.blit(title_surface, title_rectangle)
     windows.blit(highscore, highscore_rectangle)
     windows.blit(sortie, sortie_rectangle)
-    if choice == 0:
-        pygame.draw.rect(windows, "Red", start_game_rectangle, 1)
-    if choice == -1:
-        pygame.draw.rect(windows, "Red", start_game_rectangle, -1)
-        pygame.draw.rect(windows, "Red", instruction_rectangle, 1)
-    if choice == -2:
-        pygame.draw.rect(windows, "Red", instruction_rectangle, -1)
-        pygame.draw.rect(windows, "Red", highscore_rectangle, 1)
-    if choice == -3:
-        pygame.draw.rect(windows, "Red", highscore_rectangle, -1)
-        pygame.draw.rect(windows, "Red", sortie_rectangle, 1)
+
 
 
 def verif_config():
@@ -163,21 +189,6 @@ h1_font = pygame.font.Font("Pixeltype.ttf", 300)
 font_text = pygame.font.Font("Pixeltype.ttf", 50)
 time_font = pygame.font.Font("Pixeltype.ttf", 500)
 
-title_surface = h1_font.render("Pac-Man", False, "Red")
-title_rectangle = title_surface.get_rect(center=(SCREEN_WIDTH/2, 200))
-
-start_game = font.render("Start Game", False, (64, 64, 64))
-start_game_rectangle = start_game.get_rect(center=(SCREEN_WIDTH/2, 500))
-
-instruction = font.render("Instructions", False, (64, 64, 64))
-instruction_rectangle = instruction.get_rect(center=(SCREEN_WIDTH/2, 600))
-
-highscore = font.render("Highscore", False, (64, 64, 64))
-highscore_rectangle = highscore.get_rect(center=(SCREEN_WIDTH/2, 700))
-
-sortie = font.render("Exit", False, (64, 64, 64))
-sortie_rectangle = sortie.get_rect(center=(SCREEN_WIDTH/2, 800))
-
 resume = font.render("Resume", False, "Yellow")
 resume_rectangle = resume.get_rect(center=(SCREEN_WIDTH/2, 480))
 
@@ -213,28 +224,29 @@ while run:
             pygame.quit()
             exit()
         if event.type == pygame.KEYDOWN:
-            if choice == 0 and pause is False:
+            if choice == 0 and pause is False and active_game is False:
                 if event.key == pygame.K_UP:
                     choice = 0
                 if event.key == pygame.K_DOWN:
                     choice = -1
-            elif choice == -1 and pause is False:
+            elif choice == -1 and pause is False and active_game is False:
                 if event.key == pygame.K_UP:
                     choice = 0
                 if event.key == pygame.K_DOWN:
                     choice = -2
-            elif choice == -2 and pause is False:
+            elif choice == -2 and pause is False and active_game is False:
                 if event.key == pygame.K_UP:
                     choice = -1
                 if event.key == pygame.K_DOWN:
                     choice = -3
-            elif choice == -3 and pause is False:
+            elif choice == -3 and pause is False and active_game is False:
                 if event.key == pygame.K_UP:
                     choice = -2
                 if event.key == pygame.K_DOWN:
                     choice = -3
             if choice == 0 and event.key == pygame.K_RETURN and pause is False:
                 active_game = True
+                cpt = 0
             if choice == -3 and event.key == pygame.K_RETURN and pause is False:
                 pygame.quit()
                 exit()
@@ -263,10 +275,11 @@ while run:
             windows.blit(resume, resume_rectangle)
             windows.blit(stop_current_game, stop_current_game_rect)
             if pause_choice == 0:
-                resume.fill("Blue")
+                resume = font.render("Resume", False, "Blue")
+                stop_current_game = font.render("Main Menu", False, "Yellow")
             if pause_choice == -1:
-                pygame.draw.rect(windows, "Red", resume_rectangle, -1)
-                pygame.draw.rect(windows, "Red", stop_current_game_rect, 1)
+                resume = font.render("Resume", False, "Yellow")
+                stop_current_game = font.render("Main Menu", False, "Blue")
             pygame.display.update()
             continue
         count += 1
@@ -332,10 +345,11 @@ while run:
             g4.reset()
             next_dir = 0
             pacgum = create_pacgum(wall)
+            superpacgum = create_superpacgum(wall)
             level += 1
             actual_time = int(time())
             if level - 1 == verif.level:
-                active_game = False  # a changer pour mettre lecran de victoire
+                pygame.image.load("victory.webp").convert_alpha()
 
         if p1.rect.colliderect(g1.rect):
             if g1.scared == 0:
