@@ -205,6 +205,7 @@ class Ghost(Character):
             return 7
 
     def move(self, X: int, Y: int, wall: list[list[int]]) -> None:
+        self.speed = 5
         self.rect = pygame.Rect(self.x, self.y, self.sprite.get_width(), self.sprite.get_height())
         self.next_dir = self.chase((X, Y), (self.X, self.Y), wall)
         if self.check(self.next_dir, wall[self.Y][self.X]) and self.reX == 10 and self.reY == 10:
@@ -235,6 +236,7 @@ class Ghost(Character):
         self.reY = self.y % self.CELL_SIZE
 
     def flee(self, X: int, Y: int, wall: list[list[int]]) -> None:
+        self.speed = 2.5
         self.rect = pygame.Rect(self.x, self.y, self.sprite.get_width(), self.sprite.get_height())
         dir_pos = [7, 11, 13, 14]
         self.next_dir = self.chase((X, Y), (self.X, self.Y), wall)
