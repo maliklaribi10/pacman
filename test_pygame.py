@@ -299,19 +299,19 @@ while run:
         p1.move(next_dir, wall)
         if int(time()) - g1.death_timer > 3 and g1.scared == 0:
             g1.move(p1.X, p1.Y, wall)
-        else:
+        elif g1.scared == 1:
             g1.flee(p1.X, p1.Y, wall)
         if int(time()) - g2.death_timer > 3 and g2.scared == 0:
             g2.move(p1.X, p1.Y, wall)
-        else:
+        elif g2.scared == 1:
             g2.flee(p1.X, p1.Y, wall)
         if int(time()) - g3.death_timer > 3 and g3.scared == 0:
             g3.move(p1.X, p1.Y, wall)
-        else:
+        elif g3.scared == 1:
             g3.flee(p1.X, p1.Y, wall)
         if int(time()) - g4.death_timer > 3 and g4.scared == 0:
             g4.move(p1.X, p1.Y, wall)
-        else:
+        elif g4.scared == 1:
             g4.flee(p1.X, p1.Y, wall)
 
         windows.fill((0, 0, 0))
