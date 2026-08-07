@@ -275,11 +275,11 @@ while run:
             windows.blit(resume, resume_rectangle)
             windows.blit(stop_current_game, stop_current_game_rect)
             if pause_choice == 0:
-                resume = font.render("Resume", False, "Blue")
+                resume = font.render("Resume", False, "Red")
                 stop_current_game = font.render("Main Menu", False, "Yellow")
             if pause_choice == -1:
                 resume = font.render("Resume", False, "Yellow")
-                stop_current_game = font.render("Main Menu", False, "Blue")
+                stop_current_game = font.render("Main Menu", False, "Red")
             pygame.display.update()
             continue
         count += 1
