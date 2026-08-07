@@ -332,6 +332,7 @@ while run:
             g4.reset()
             next_dir = 0
             pacgum = create_pacgum(wall)
+            superpacgum = create_superpacgum(wall)
             level += 1
             actual_time = int(time())
             if level - 1 == verif.level:
