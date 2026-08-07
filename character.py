@@ -2,7 +2,6 @@ import pygame
 from typing import Any
 from pygame import Surface
 
-
 SCREEN_WIDTH = 1001
 SCREEN_HEIGHT = 1050
 
@@ -135,7 +134,7 @@ class Ghost(Character):
             pygame.transform.scale(pygame.image.load("ghost/scared/f6.png").convert_alpha(), (32, 32)),
             pygame.transform.scale(pygame.image.load("ghost/scared/f7.png").convert_alpha(), (32, 32))
         ]
-        self.dead = 0
+        self.death_timer = 0
 
     def chase(
         self,
@@ -230,6 +229,43 @@ class Ghost(Character):
                 pass
             else:
                 self.y += self.speed
+        self.X = self.rect.centerx // self.CELL_SIZE
+        self.Y = self.rect.centery // self.CELL_SIZE
+        self.reX = self.x % self.CELL_SIZE
+        self.reY = self.y % self.CELL_SIZE
+
+    def flee(self, X: int, Y: int, wall: list[list[int]]) -> None:
+        self.rect = pygame.Rect(self.x, self.y, self.sprite.get_width(), self.sprite.get_height())
+        dir_pos = [7, 11, 13, 14]
+        self.next_dir = self.chase((X, Y), (self.X, self.Y), wall)
+        dir_pos.remove(self.next_dir)
+        for next_dir in dir_pos:
+            if self.check(next_dir, wall[self.Y][self.X]) and self.reX == 10 and self.reY == 10:
+                self.dir = next_dir
+            if self.dir == 7 and self.x > 10:
+                if (wall[self.Y][self.X] >> 3) & 1 == 1 and self.reX == 10 and self.reY == 10:
+                    pass
+                else:
+                    self.x -= self.speed
+                    break
+            if self.dir == 13 and self.x < SCREEN_WIDTH - self.CELL_SIZE + 10:
+                if (wall[self.Y][self.X] >> 1) & 1 == 1 and self.reX == 10 and self.reY == 10:
+                    pass
+                else:
+                    self.x += self.speed
+                    break
+            if self.dir == 14 and self.y > 10:
+                if (wall[self.Y][self.X] >> 0) & 1 == 1 and self.reX == 10 and self.reY == 10:
+                    pass
+                else:
+                    self.y -= self.speed
+                    break
+            if self.dir == 11 and self.y < SCREEN_HEIGHT - self.CELL_SIZE + 10:
+                if (wall[self.Y][self.X] >> 2) & 1 == 1 and self.reX == 10 and self.reY == 10:
+                    pass
+                else:
+                    self.y += self.speed
+                    break
         self.X = self.rect.centerx // self.CELL_SIZE
         self.Y = self.rect.centery // self.CELL_SIZE
         self.reX = self.x % self.CELL_SIZE

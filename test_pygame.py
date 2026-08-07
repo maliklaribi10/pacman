@@ -297,14 +297,22 @@ while run:
         if keys[pygame.K_t]:
             run = False
         p1.move(next_dir, wall)
-        if g1.dead == 0:
+        if int(time()) - g1.death_timer > 3 and g1.scared == 0:
             g1.move(p1.X, p1.Y, wall)
-        if g2.dead == 0:
+        else:
+            g1.flee(p1.X, p1.Y, wall)
+        if int(time()) - g2.death_timer > 3 and g2.scared == 0:
             g2.move(p1.X, p1.Y, wall)
-        if g3.dead == 0:
+        else:
+            g2.flee(p1.X, p1.Y, wall)
+        if int(time()) - g3.death_timer > 3 and g3.scared == 0:
             g3.move(p1.X, p1.Y, wall)
-        if g4.dead == 0:
+        else:
+            g3.flee(p1.X, p1.Y, wall)
+        if int(time()) - g4.death_timer > 3 and g4.scared == 0:
             g4.move(p1.X, p1.Y, wall)
+        else:
+            g4.flee(p1.X, p1.Y, wall)
 
         windows.fill((0, 0, 0))
         timer_surface = time_font.render(f"{timer}", False, (64, 64, 64))
@@ -351,7 +359,7 @@ while run:
             if level - 1 == verif.level:
                 pygame.image.load("victory.webp").convert_alpha()
 
-        if p1.rect.colliderect(g1.rect):
+        if p1.rect.colliderect(g1.rect) and int(time()) - g1.death_timer > 3:
             if g1.scared == 0:
                 p1.reset()
                 g1.reset()
@@ -363,7 +371,8 @@ while run:
             else:
                 score += verif.score_ghost
                 g1.reset()
-        if p1.rect.colliderect(g2.rect):
+                g1.death_timer = int(time())
+        if p1.rect.colliderect(g2.rect) and int(time()) - g2.death_timer > 3:
             if g2.scared == 0:
                 p1.reset()
                 g1.reset()
@@ -375,7 +384,8 @@ while run:
             else:
                 score += verif.score_ghost
                 g2.reset()
-        if p1.rect.colliderect(g3.rect):
+                g2.death_timer = int(time())
+        if p1.rect.colliderect(g3.rect) and int(time()) - g3.death_timer > 3:
             if g3.scared == 0:
                 p1.reset()
                 g1.reset()
@@ -387,7 +397,8 @@ while run:
             else:
                 score += verif.score_ghost
                 g3.reset()
-        if p1.rect.colliderect(g4.rect):
+                g3.death_timer = int(time())
+        if p1.rect.colliderect(g4.rect) and int(time()) - g4.death_timer > 3:
             if g4.scared == 0:
                 p1.reset()
                 g1.reset()
@@ -399,6 +410,7 @@ while run:
             else:
                 score += verif.score_ghost
                 g4.reset()
+                g4.death_timer = int(time())
 
         if verif.lives == 0 or timer == 0:
             active_game = False
