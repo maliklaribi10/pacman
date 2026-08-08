@@ -5,7 +5,7 @@ from typing import Self
 from random import randint, seed
 import sys
 import json
-from time import time
+from time import time, sleep
 from pydantic import Field, BaseModel, model_validator
 import character as char
 
@@ -15,7 +15,7 @@ class Json(BaseModel):
     level: int = Field(ge=1, default=10)
     width: int = Field(ge=10, default=20)
     height: int = Field(ge=10, default=20)
-    lives: int = Field(ge=1, default=3)
+    lives: int = Field(ge=1, default=5)
     pacgum: int = Field(ge=1)
     score_pacgum: int = Field(ge=1, default=10)
     score_superpacgum: int = Field(ge=1, default=50)
@@ -85,6 +85,30 @@ def main_menu():
     windows.blit(highscore, highscore_rectangle)
     windows.blit(sortie, sortie_rectangle)
 
+
+def flou(screen: pygame.Surface):
+    screen_copy = screen.copy()
+
+    small = pygame.transform.smoothscale(
+        screen_copy,
+        (screen.get_width() // 10, screen.get_height() // 10)
+    )
+
+    blurred = pygame.transform.smoothscale(
+        small,
+        screen.get_size()
+    )
+
+    return blurred
+
+
+def victory_game_over_screen(image: pygame.Surface, score: int):
+    image = pygame.transform.scale(image, (900, 600))
+    image_rect = image.get_rect(center=(windows.get_width()/2, 200))
+    windows.blit(image, image_rect)
+    score_surf = font_text.render(f"Your score: {score}", False, (64, 64, 64))
+    score_rect = score_surf.get_rect(center=(windows.get_width()/2, 300))
+    windows.blit(score_surf, score_rect)
 
 
 def verif_config():
@@ -208,11 +232,14 @@ active_game = False
 exit_game = False
 choice = 0
 pause = False
-life: int = 3
 level = 1
 actual_time = int(time())
 time_inv = 0
 pause_choice = 0
+game_over_screen = False
+victory_screen = False
+blurred_background = None
+initial_lives = verif.lives
 p1 = char.Pacman(460, 460, CELL_SIZE)
 g1 = char.Ghost(960, 960, CELL_SIZE, "red")
 g2 = char.Ghost(10, 960, CELL_SIZE, "pink")
@@ -250,7 +277,7 @@ while run:
             if choice == -3 and event.key == pygame.K_RETURN and pause is False:
                 pygame.quit()
                 exit()
-            if event.key == pygame.K_ESCAPE and active_game is True:
+            if event.key == pygame.K_ESCAPE and active_game is True and game_over_screen is False and victory_screen is False:
                 pause = True
                 if pause:
                     pause_pause_choice = 0
@@ -267,11 +294,25 @@ while run:
                     pause_choice = -1
             if pause_choice == 0 and event.key == pygame.K_RETURN and pause is True:
                 pause = False
+                blurred_background = None
             if pause_choice == -1 and event.key == pygame.K_RETURN and pause is True:
                 pause = False
+                blurred_background = None
                 active_game = False
+            if event.key == pygame.K_RETURN and game_over_screen is True:
+                active_game = False
+                game_over_screen = False
+                blurred_background = None
+            if event.key == pygame.K_RETURN and victory_screen is True:
+                active_game = False
+                victory_screen = False
+                blurred_background = None
     if active_game:
         if pause:
+            if blurred_background is None:
+                blurred_background = flou(windows)
+
+            windows.blit(blurred_background, (0, 0))
             windows.blit(resume, resume_rectangle)
             windows.blit(stop_current_game, stop_current_game_rect)
             if pause_choice == 0:
@@ -280,6 +321,24 @@ while run:
             if pause_choice == -1:
                 resume = font.render("Resume", False, "Yellow")
                 stop_current_game = font.render("Main Menu", False, "Red")
+            pygame.display.update()
+            continue
+        if game_over_screen:
+            victory = pygame.image.load("game over.png").convert_alpha()
+            if blurred_background is None:
+                blurred_background = flou(windows)
+
+            windows.blit(blurred_background, (0, 0))
+            victory_game_over_screen(victory, score)
+            pygame.display.update()
+            continue
+        if victory_screen:
+            victory = pygame.image.load("victory.png").convert_alpha()
+            if blurred_background is None:
+                blurred_background = flou(windows)
+
+            windows.blit(blurred_background, (0, 0))
+            victory_game_over_screen(victory, score)
             pygame.display.update()
             continue
         count += 1
@@ -342,7 +401,7 @@ while run:
             g2.scared = 0
             g3.scared = 0
             g4.scared = 0
-        if pacgum == set() and superpacgum == set():
+        if pacgum == set():
             maze = MazeGenerator((verif.width, verif.height))
             maze.generate()
             wall = maze.maze
@@ -357,63 +416,76 @@ while run:
             level += 1
             actual_time = int(time())
             if level - 1 == verif.level:
-                pygame.image.load("victory.webp").convert_alpha()
+                victory_screen = True
+                continue
 
         if p1.rect.colliderect(g1.rect) and int(time()) - g1.death_timer > 3:
             if g1.scared == 0:
+                verif.lives = verif.lives - 1
+                if verif.lives == 0:
+                    game_over_screen = True
+                    continue
                 p1.reset()
                 g1.reset()
                 g2.reset()
                 g3.reset()
                 g4.reset()
                 next_dir = 0
-                verif.lives = verif.lives - 1
             else:
                 score += verif.score_ghost
                 g1.reset()
                 g1.death_timer = int(time())
         if p1.rect.colliderect(g2.rect) and int(time()) - g2.death_timer > 3:
             if g2.scared == 0:
+                verif.lives = verif.lives - 1
+                if verif.lives == 0:
+                    game_over_screen = True
+                    continue
                 p1.reset()
                 g1.reset()
                 g2.reset()
                 g3.reset()
                 g4.reset()
                 next_dir = 0
-                verif.lives = verif.lives - 1
             else:
                 score += verif.score_ghost
                 g2.reset()
                 g2.death_timer = int(time())
         if p1.rect.colliderect(g3.rect) and int(time()) - g3.death_timer > 3:
             if g3.scared == 0:
+                verif.lives = verif.lives - 1
+                if verif.lives == 0:
+                    game_over_screen = True
+                    continue
                 p1.reset()
                 g1.reset()
                 g2.reset()
                 g3.reset()
                 g4.reset()
                 next_dir = 0
-                verif.lives = verif.lives - 1
             else:
                 score += verif.score_ghost
                 g3.reset()
                 g3.death_timer = int(time())
         if p1.rect.colliderect(g4.rect) and int(time()) - g4.death_timer > 3:
             if g4.scared == 0:
+                verif.lives = verif.lives - 1
+                if verif.lives == 0:
+                    game_over_screen = True
+                    continue
                 p1.reset()
                 g1.reset()
                 g2.reset()
                 g3.reset()
                 g4.reset()
                 next_dir = 0
-                verif.lives = verif.lives - 1
             else:
                 score += verif.score_ghost
                 g4.reset()
                 g4.death_timer = int(time())
-
         if verif.lives == 0 or timer == 0:
-            active_game = False
+            game_over_screen = True
+            continue
         windows.blit(p1.choose_dir(p1.frames[count % 4], p1.dir), (p1.x, p1.y))
         g1.show(count, windows)
         g2.show(count, windows)
@@ -442,7 +514,7 @@ while run:
         pacgum = create_pacgum(wall)
         superpacgum = create_superpacgum(wall)
         score = 0
-        verif.lives = 3
+        verif.lives = initial_lives
         level = 1
         actual_time = int(time())
         main_menu()
