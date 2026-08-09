@@ -5,7 +5,7 @@ from typing import Self
 from random import randint, seed
 import sys
 import json
-from time import time, sleep
+from time import time
 from pydantic import Field, BaseModel, model_validator
 import character as char
 
@@ -225,6 +225,7 @@ vertical_wall.fill("White")
 horizontal_wall.fill("White")
 font = pygame.font.Font("Pixeltype.ttf", 100)
 h1_font = pygame.font.Font("Pixeltype.ttf", 300)
+h2_font = pygame.font.Font("Pixeltype.ttf", 250)
 font_text = pygame.font.Font("Pixeltype.ttf", 50)
 time_font = pygame.font.Font("Pixeltype.ttf", 500)
 
@@ -255,6 +256,11 @@ game_over_screen = False
 victory_screen = False
 blurred_background = None
 initial_lives = verif.lives
+name_user = ""
+pressed = 0
+highscore = False
+content: dict[str, int] = {}
+cpt = 0
 p1 = char.Pacman(460, 460, CELL_SIZE)
 g1 = char.Ghost(960, 960, CELL_SIZE, "red")
 g2 = char.Ghost(10, 960, CELL_SIZE, "pink")
@@ -266,29 +272,32 @@ while run:
             pygame.quit()
             exit()
         if event.type == pygame.KEYDOWN:
-            if choice == 0 and pause is False and active_game is False:
+            if choice == 0 and pause is False and active_game is False and highscore is False:
                 if event.key == pygame.K_UP:
                     choice = 0
                 if event.key == pygame.K_DOWN:
                     choice = -1
-            elif choice == -1 and pause is False and active_game is False:
+            elif choice == -1 and pause is False and active_game is False and highscore is False:
                 if event.key == pygame.K_UP:
                     choice = 0
                 if event.key == pygame.K_DOWN:
                     choice = -2
-            elif choice == -2 and pause is False and active_game is False:
+            elif choice == -2 and pause is False and active_game is False and highscore is False:
                 if event.key == pygame.K_UP:
                     choice = -1
                 if event.key == pygame.K_DOWN:
                     choice = -3
-            elif choice == -3 and pause is False and active_game is False:
+            elif choice == -3 and pause is False and active_game is False and highscore is False:
                 if event.key == pygame.K_UP:
                     choice = -2
                 if event.key == pygame.K_DOWN:
                     choice = -3
             if choice == 0 and event.key == pygame.K_RETURN and pause is False:
                 active_game = True
-                cpt = 0
+            if choice == -2 and event.key == pygame.K_RETURN and pause is False:
+                highscore = True
+            if highscore and event.key == pygame.K_q:
+                highscore = False
             if choice == -3 and event.key == pygame.K_RETURN and pause is False:
                 pygame.quit()
                 exit()
@@ -314,14 +323,42 @@ while run:
                 pause = False
                 blurred_background = None
                 active_game = False
-            if event.key == pygame.K_RETURN and game_over_screen is True:
+            if event.key == pygame.K_ESCAPE and game_over_screen is True:
                 active_game = False
                 game_over_screen = False
                 blurred_background = None
-            if event.key == pygame.K_RETURN and victory_screen is True:
+            if event.key == pygame.K_ESCAPE and victory_screen is True:
                 active_game = False
                 victory_screen = False
                 blurred_background = None
+            if event.key == pygame.K_BACKSPACE and (victory_screen is True or game_over_screen is True):
+                name_user = name_user[:-1]
+            elif victory_screen is True or game_over_screen is True:
+                if len(name_user) < 10 and (event.unicode.isalnum() or event.unicode == ' '):
+                    name_user += event.unicode
+            if event.key == pygame.K_RETURN and (victory_screen is True or game_over_screen is True):
+                pressed += 1
+                if len(name_user) >= 1:
+                    active_game = False
+                    try:
+                        with open(verif.highscore_filename, 'r') as f:
+                            content = json.load(f)
+                            if name_user in content.keys():
+                                if score > content[name_user]:
+                                    content.update({name_user: score})
+                            else:
+                                content.update({name_user: score})
+                            content = dict(sorted(content.items(), key=lambda x: x[1], reverse=True))
+                        with open(verif.highscore_filename, 'w') as f:
+                            json.dump(content, f, indent=4)
+                    except (FileNotFoundError, json.decoder.JSONDecodeError):
+                        pass
+                        # seulement si il arrive pas a ouvrir
+                        with open(verif.highscore_filename, 'w') as f:
+                            content = {name_user: score}
+                            json.dump(content, f, indent=4)
+                    except (Exception):
+                        pass
     if active_game:
         if pause:
             if blurred_background is None:
@@ -345,6 +382,12 @@ while run:
 
             windows.blit(blurred_background, (0, 0))
             victory_game_over_screen(victory, score, "Red")
+            name_user_surf = font.render(f"{name_user}", False, (64, 64, 64))
+            windows.blit(name_user_surf, (170, 450))
+            if len(name_user) < 1 and pressed >= 1:
+                error_message_surf = font_text.render("Please enter a minimum of 1 caracter", False, "Red")
+                error_message_rect = error_message_surf.get_rect(center=(windows.get_width()/2, 600))
+                windows.blit(error_message_surf, error_message_rect)
             pygame.display.update()
             continue
         if victory_screen:
@@ -354,6 +397,8 @@ while run:
 
             windows.blit(blurred_background, (0, 0))
             victory_game_over_screen(victory, score, "Yellow")
+            name_user_surf = font.render(f"{name_user}", False, (64, 64, 64))
+            windows.blit(name_user_surf, (170, 450))
             pygame.display.update()
             continue
         count += 1
@@ -532,6 +577,37 @@ while run:
         verif.lives = initial_lives
         level = 1
         actual_time = int(time())
+        victory_screen = False
+        game_over_screen = False
+        name_user = ""
+        pressed = 0
         main_menu()
+        if highscore:
+            highscore_backgroud_surf = pygame.Surface((800, 800))
+            highscore_backgroud_rect = highscore_backgroud_surf.get_rect(center=(windows.get_width()/2, windows.get_height()/2))
+            pygame.draw.rect(windows, "Black", highscore_backgroud_rect, border_radius=10)
+            highscore_title_surf = h2_font.render("Highscore", False, "Yellow")
+            highscore_title_rect = highscore_title_surf.get_rect(midtop=(windows.get_width()/2, windows.get_height()/2 - 390))
+            windows.blit(highscore_title_surf, highscore_title_rect)
+            quit_text = font_text.render("Press Q to exit", False, (64, 64, 64))
+            quit_rect = quit_text.get_rect(midbottom=(windows.get_width()/2, windows.get_height()/2 + 390))
+            timeing = pygame.time.get_ticks()
+            if (timeing // 500) % 2 == 0:
+                windows.blit(quit_text, quit_rect)
+            if content == {}:
+                no_score_recorded = font.render("No scores provided", False, "White")
+                no_score_recorded_rect = no_score_recorded.get_rect(center=(windows.get_width()/2, windows.get_height()/2))
+                windows.blit(no_score_recorded, no_score_recorded_rect)
+            else:
+                with open(verif.highscore_filename, 'r') as f:
+                    content = json.load(f)
+                print(content)
+                for i in content:
+                    highscore_content_surf = font_text.render(f"{i}      {content[i]}", False, "White")
+                    highscore_content_rect = highscore_content_surf.get_rect(center=(windows.get_width()/2, windows.get_height()/2 - 200))
+                    windows.blit(highscore_content_surf, highscore_content_rect)
+                    cpt += 1
+                    if cpt > 10:
+                        break
     pygame.display.update()
 pygame.quit()

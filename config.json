@@ -1,10 +1,10 @@
 {
     "highscore_filename": "highscore.json",
-    "level": 10,
+    "level": 1,
     "width": 20,
     "height": 20,
     "lives": 1,
-    "pacgum": 8,
+    "pacgum": 90,
     "score_pacgum": 10,
     "score_superpacgum": 50,
     "score_ghost": 200,
