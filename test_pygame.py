@@ -581,6 +581,7 @@ while run:
         game_over_screen = False
         name_user = ""
         pressed = 0
+        cpt = 0
         main_menu()
         if highscore:
             highscore_backgroud_surf = pygame.Surface((800, 800))
@@ -594,20 +595,22 @@ while run:
             timeing = pygame.time.get_ticks()
             if (timeing // 500) % 2 == 0:
                 windows.blit(quit_text, quit_rect)
+            try:
+                with open(verif.highscore_filename, 'r') as f:
+                    content = json.load(f)
+            except FileNotFoundError:
+                pass
             if content == {}:
                 no_score_recorded = font.render("No scores provided", False, "White")
                 no_score_recorded_rect = no_score_recorded.get_rect(center=(windows.get_width()/2, windows.get_height()/2))
                 windows.blit(no_score_recorded, no_score_recorded_rect)
             else:
-                with open(verif.highscore_filename, 'r') as f:
-                    content = json.load(f)
-                print(content)
                 for i in content:
-                    highscore_content_surf = font_text.render(f"{i}      {content[i]}", False, "White")
-                    highscore_content_rect = highscore_content_surf.get_rect(center=(windows.get_width()/2, windows.get_height()/2 - 200))
-                    windows.blit(highscore_content_surf, highscore_content_rect)
                     cpt += 1
                     if cpt > 10:
                         break
+                    highscore_content_surf = font_text.render(f"{i}          {content[i]}", False, "White")
+                    highscore_content_rect = highscore_content_surf.get_rect(topleft=(windows.get_width()/2 - 70, windows.get_height()/2 - (230 - ((cpt * 50)))))
+                    windows.blit(highscore_content_surf, highscore_content_rect)
     pygame.display.update()
 pygame.quit()
