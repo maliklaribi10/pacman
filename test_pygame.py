@@ -102,13 +102,28 @@ def flou(screen: pygame.Surface):
     return blurred
 
 
-def victory_game_over_screen(image: pygame.Surface, score: int):
+def victory_game_over_screen(image: pygame.Surface, score: int, color: str):
     image = pygame.transform.scale(image, (900, 600))
     image_rect = image.get_rect(center=(windows.get_width()/2, 200))
     windows.blit(image, image_rect)
     score_surf = font_text.render(f"Your score: {score}", False, (64, 64, 64))
     score_rect = score_surf.get_rect(center=(windows.get_width()/2, 300))
     windows.blit(score_surf, score_rect)
+    text_surf = font.render("Entrez votre nom:", False, color)
+    text_rect = text_surf.get_rect(center=(windows.get_width()/2, 400))
+    windows.blit(text_surf, text_rect)
+    rectangle_surf = pygame.Surface((700, 100))
+    rectangle_rect = rectangle_surf.get_rect(center=(windows.get_width()/2, 480))
+    pygame.draw.rect(windows, color, rectangle_rect, 3, border_radius=10)
+    confirm_surf = font_text.render("Press ENTER to confirm", False, (64, 64, 64))
+    confirm_rect = confirm_surf.get_rect(center=(windows.get_width()/2, 560))
+    windows.blit(confirm_surf, confirm_rect)
+    exit_surf = font_text.render("Press ECHAP to skip", False, (64, 64, 64))
+    exit_rect = exit_surf.get_rect(midbottom=(windows.get_width()/2, windows.get_height() - 10))
+    time = pygame.time.get_ticks()
+
+    if (time // 500) % 2 == 0:
+        windows.blit(exit_surf, exit_rect)
 
 
 def verif_config():
@@ -329,7 +344,7 @@ while run:
                 blurred_background = flou(windows)
 
             windows.blit(blurred_background, (0, 0))
-            victory_game_over_screen(victory, score)
+            victory_game_over_screen(victory, score, "Red")
             pygame.display.update()
             continue
         if victory_screen:
@@ -338,7 +353,7 @@ while run:
                 blurred_background = flou(windows)
 
             windows.blit(blurred_background, (0, 0))
-            victory_game_over_screen(victory, score)
+            victory_game_over_screen(victory, score, "Yellow")
             pygame.display.update()
             continue
         count += 1
