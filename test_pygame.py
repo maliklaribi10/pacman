@@ -183,7 +183,7 @@ def show_pacgum(pacgum: set[tuple[int, int]]):
         objet = pygame.Surface((max(2, CELL_SIZE // 10), max(2, CELL_SIZE // 10)))
         objet_rect = objet.get_rect(center=(center_x, center_y))
 
-        pygame.draw.rect(windows, "Orange", objet_rect)
+        pygame.draw.rect(windows, "Orange", objet_rect, border_radius=40)
 
 
 def show_maze():
@@ -267,6 +267,7 @@ initial_lives = verif.lives
 name_user = ""
 pressed = 0
 highscore = False
+instruction = False
 content: dict[str, int] = {}
 cpt = 0
 p1 = char.Pacman(460, 460, CELL_SIZE)
@@ -280,28 +281,32 @@ while run:
             pygame.quit()
             exit()
         if event.type == pygame.KEYDOWN:
-            if choice == 0 and pause is False and active_game is False and highscore is False:
+            if choice == 0 and pause is False and active_game is False and highscore is False and instruction is False:
                 if event.key == pygame.K_UP:
                     choice = 0
                 if event.key == pygame.K_DOWN:
                     choice = -1
-            elif choice == -1 and pause is False and active_game is False and highscore is False:
+            elif choice == -1 and pause is False and active_game is False and highscore is False and instruction is False:
                 if event.key == pygame.K_UP:
                     choice = 0
                 if event.key == pygame.K_DOWN:
                     choice = -2
-            elif choice == -2 and pause is False and active_game is False and highscore is False:
+            elif choice == -2 and pause is False and active_game is False and highscore is False and instruction is False:
                 if event.key == pygame.K_UP:
                     choice = -1
                 if event.key == pygame.K_DOWN:
                     choice = -3
-            elif choice == -3 and pause is False and active_game is False and highscore is False:
+            elif choice == -3 and pause is False and active_game is False and highscore is False and instruction is False:
                 if event.key == pygame.K_UP:
                     choice = -2
                 if event.key == pygame.K_DOWN:
                     choice = -3
             if choice == 0 and event.key == pygame.K_RETURN and pause is False:
                 active_game = True
+            if choice == -1 and event.key == pygame.K_RETURN and pause is False:
+                instruction = True
+            if instruction and event.key == pygame.K_q:
+                instruction = False
             if choice == -2 and event.key == pygame.K_RETURN and pause is False:
                 highscore = True
             if highscore and event.key == pygame.K_q:
@@ -469,7 +474,7 @@ while run:
             g2.scared = 0
             g3.scared = 0
             g4.scared = 0
-        if pacgum == set():
+        if pacgum == set() and superpacgum == set():
             maze = MazeGenerator((verif.width, verif.height))
             maze.generate()
             wall = maze.maze
@@ -555,10 +560,14 @@ while run:
             game_over_screen = True
             continue
         windows.blit(p1.choose_dir(p1.frames[count % 4], p1.dir), (p1.x, p1.y))
-        g1.show(count, windows)
-        g2.show(count, windows)
-        g3.show(count, windows)
-        g4.show(count, windows)
+        if int(time()) - g1.death_timer > 3:
+            g1.show(count, windows)
+        if int(time()) - g2.death_timer > 3:
+            g2.show(count, windows)
+        if int(time()) - g3.death_timer > 3:
+            g3.show(count, windows)
+        if int(time()) - g4.death_timer > 3:
+            g4.show(count, windows)
         score_surface = font_text.render(f"{score}", False, (64, 64, 64))
         score_rect = score_surface.get_rect(bottomright=(990, 1050))
         windows.blit(score_surface, score_rect)
@@ -591,6 +600,11 @@ while run:
         pressed = 0
         cpt = 0
         main_menu()
+        if instruction:
+            instruction_surf = pygame.image.load("image/instruction.png").convert_alpha()
+            instruction_surf = pygame.transform.scale(instruction_surf, (800, 800))
+            instruction_rect = instruction_surf.get_rect(center=(windows.get_width()/2, windows.get_height()/2))
+            windows.blit(instruction_surf, instruction_rect)
         if highscore:
             highscore_backgroud_surf = pygame.Surface((800, 800))
             highscore_backgroud_rect = highscore_backgroud_surf.get_rect(center=(windows.get_width()/2, windows.get_height()/2))

@@ -1,7 +1,6 @@
 import pygame
 from typing import Any
 from pygame import Surface
-from time import time
 
 SCREEN_WIDTH = 1001
 SCREEN_HEIGHT = 1050
