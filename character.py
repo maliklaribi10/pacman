@@ -1,6 +1,7 @@
 import pygame
 from typing import Any
 from pygame import Surface
+from time import time
 
 SCREEN_WIDTH = 1001
 SCREEN_HEIGHT = 1050
@@ -247,30 +248,26 @@ class Ghost(Character):
         for next_dir in dir_pos:
             if self.check(next_dir, wall[self.Y][self.X]) and self.reX == 10 and self.reY == 10:
                 self.dir = next_dir
-            if self.dir == 7 and self.x > 10:
-                if (wall[self.Y][self.X] >> 3) & 1 == 1 and self.reX == 10 and self.reY == 10:
-                    pass
-                else:
-                    self.x -= self.speed
-                    break
-            if self.dir == 13 and self.x < SCREEN_WIDTH - self.CELL_SIZE + 10:
-                if (wall[self.Y][self.X] >> 1) & 1 == 1 and self.reX == 10 and self.reY == 10:
-                    pass
-                else:
-                    self.x += self.speed
-                    break
-            if self.dir == 14 and self.y > 10:
-                if (wall[self.Y][self.X] >> 0) & 1 == 1 and self.reX == 10 and self.reY == 10:
-                    pass
-                else:
-                    self.y -= self.speed
-                    break
-            if self.dir == 11 and self.y < SCREEN_HEIGHT - self.CELL_SIZE + 10:
-                if (wall[self.Y][self.X] >> 2) & 1 == 1 and self.reX == 10 and self.reY == 10:
-                    pass
-                else:
-                    self.y += self.speed
-                    break
+        if self.dir == 7 and self.x > 10:
+            if (wall[self.Y][self.X] >> 3) & 1 == 1 and self.reX == 10 and self.reY == 10:
+                pass
+            else:
+                self.x -= self.speed
+        if self.dir == 13 and self.x < SCREEN_WIDTH - self.CELL_SIZE + 10:
+            if (wall[self.Y][self.X] >> 1) & 1 == 1 and self.reX == 10 and self.reY == 10:
+                pass
+            else:
+                self.x += self.speed
+        if self.dir == 14 and self.y > 10:
+            if (wall[self.Y][self.X] >> 0) & 1 == 1 and self.reX == 10 and self.reY == 10:
+                pass
+            else:
+                self.y -= self.speed
+        if self.dir == 11 and self.y < SCREEN_HEIGHT - self.CELL_SIZE + 10:
+            if (wall[self.Y][self.X] >> 2) & 1 == 1 and self.reX == 10 and self.reY == 10:
+                pass
+            else:
+                self.y += self.speed
         self.X = self.rect.centerx // self.CELL_SIZE
         self.Y = self.rect.centery // self.CELL_SIZE
         self.reX = self.x % self.CELL_SIZE
@@ -279,6 +276,7 @@ class Ghost(Character):
     def reset(self) -> None:
         super().reset()
         self.scared = 0
+        self.death_timer = 0
 
     def show(self, count: int, windows: Surface) -> None:
         if self.scared == 1:
