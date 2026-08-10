@@ -235,6 +235,14 @@ resume_rectangle = resume.get_rect(center=(SCREEN_WIDTH/2, 480))
 stop_current_game = font.render("Main Menu", False, "Yellow")
 stop_current_game_rect = stop_current_game.get_rect(center=(SCREEN_WIDTH/2, 550))
 
+gold_image = pygame.image.load("image/gold_medal.png").convert_alpha()
+gold_image = pygame.transform.scale(gold_image, (50, 50))
+
+silver_image = pygame.image.load("image/silver_medal.png").convert_alpha()
+silver_image = pygame.transform.scale(silver_image, (50, 50))
+
+bronze_image = pygame.image.load("image/bronze_medal.png").convert_alpha()
+bronze_image = pygame.transform.scale(bronze_image, (50, 50))
 
 run = True
 score = 0
@@ -376,7 +384,7 @@ while run:
             pygame.display.update()
             continue
         if game_over_screen:
-            victory = pygame.image.load("game over.png").convert_alpha()
+            victory = pygame.image.load("image/game over.png").convert_alpha()
             if blurred_background is None:
                 blurred_background = flou(windows)
 
@@ -391,7 +399,7 @@ while run:
             pygame.display.update()
             continue
         if victory_screen:
-            victory = pygame.image.load("victory.png").convert_alpha()
+            victory = pygame.image.load("image/victory.png").convert_alpha()
             if blurred_background is None:
                 blurred_background = flou(windows)
 
@@ -609,8 +617,17 @@ while run:
                     cpt += 1
                     if cpt > 10:
                         break
-                    highscore_content_surf = font_text.render(f"{i}          {content[i]}", False, "White")
+                    highscore_content_surf = font_text.render(f"{i} - {content[i]}", False, "White")
                     highscore_content_rect = highscore_content_surf.get_rect(topleft=(windows.get_width()/2 - 70, windows.get_height()/2 - (230 - ((cpt * 50)))))
                     windows.blit(highscore_content_surf, highscore_content_rect)
+                    if cpt == 1:
+                        windows.blit(gold_image, (windows.get_width()/2 - 130, windows.get_height()/2 - (230 - ((cpt * 50)))))
+                    elif cpt == 2:
+                        windows.blit(silver_image, (windows.get_width()/2 - 130, windows.get_height()/2 - (230 - ((cpt * 50)))))
+                    elif cpt == 3:
+                        windows.blit(bronze_image, (windows.get_width()/2 - 130, windows.get_height()/2 - (230 - ((cpt * 50)))))
+                    else:
+                        highscore_position_surf = font_text.render(f"{cpt}", False, "White")
+                        windows.blit(highscore_position_surf, (windows.get_width()/2 - 110, windows.get_height()/2 - (230 - ((cpt * 50)))))
     pygame.display.update()
 pygame.quit()
