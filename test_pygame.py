@@ -5,7 +5,7 @@ from typing import Self
 from random import randint, seed
 import sys
 import json
-from time import time, sleep
+from time import time
 from pydantic import Field, BaseModel, model_validator
 import character as char
 
@@ -622,7 +622,7 @@ while run:
             try:
                 with open(verif.highscore_filename, 'r') as f:
                     content = json.load(f)
-            except FileNotFoundError:
+            except (FileNotFoundError, json.decoder.JSONDecodeError):
                 pass
             if content == {}:
                 no_score_recorded = font.render("No scores provided", False, "White")
