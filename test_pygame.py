@@ -5,7 +5,7 @@ from typing import Self
 from random import randint, seed
 import sys
 import json
-from time import time
+from time import time, sleep
 from pydantic import Field, BaseModel, model_validator
 import character as char
 
@@ -257,7 +257,8 @@ exit_game = False
 choice = 0
 pause = False
 level = 1
-actual_time = int(time())
+start_time = int(time())
+pause_start_time = 0
 time_inv = 0
 pause_choice = 0
 game_over_screen = False
@@ -315,9 +316,10 @@ while run:
                 pygame.quit()
                 exit()
             if event.key == pygame.K_ESCAPE and active_game is True and game_over_screen is False and victory_screen is False:
+                pause_start_time = int(time())
                 pause = True
                 if pause:
-                    pause_pause_choice = 0
+                    pause_choice = 0
                     continue
             if pause_choice == 0 and pause is True:
                 if event.key == pygame.K_UP:
@@ -330,6 +332,7 @@ while run:
                 if event.key == pygame.K_DOWN:
                     pause_choice = -1
             if pause_choice == 0 and event.key == pygame.K_RETURN and pause is True:
+                start_time += int(time()) - pause_start_time
                 pause = False
                 blurred_background = None
             if pause_choice == -1 and event.key == pygame.K_RETURN and pause is True:
@@ -376,7 +379,6 @@ while run:
         if pause:
             if blurred_background is None:
                 blurred_background = flou(windows)
-
             windows.blit(blurred_background, (0, 0))
             windows.blit(resume, resume_rectangle)
             windows.blit(stop_current_game, stop_current_game_rect)
@@ -415,7 +417,7 @@ while run:
             pygame.display.update()
             continue
         count += 1
-        timer = verif.max_time + actual_time - int(time())
+        timer = verif.max_time + start_time - int(time())
         clock.tick(30)
         keys = pygame.key.get_pressed()
         if keys[pygame.K_a] or keys[pygame.K_LEFT]:
@@ -487,7 +489,7 @@ while run:
             pacgum = create_pacgum(wall)
             superpacgum = create_superpacgum(wall)
             level += 1
-            actual_time = int(time())
+            start_time = int(time())
             if level - 1 == verif.level:
                 victory_screen = True
                 continue
@@ -593,7 +595,7 @@ while run:
         score = 0
         verif.lives = initial_lives
         level = 1
-        actual_time = int(time())
+        start_time = int(time())
         victory_screen = False
         game_over_screen = False
         name_user = ""
