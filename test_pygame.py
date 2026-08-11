@@ -1,7 +1,7 @@
 import pygame
 from pygame.locals import QUIT, RESIZABLE
 from mazegenerator import MazeGenerator
-from typing import Self
+from typing import Self, Any
 from random import randint, seed
 import sys
 import json
@@ -102,7 +102,106 @@ def flou(screen: pygame.Surface):
     return blurred
 
 
-def victory_game_over_screen(image: pygame.Surface, score: int, color: str):
+def highscore_screen(content: dict[str, Any]):
+    cpt = 0
+    highscore_backgroud_surf = pygame.Surface((800, 800))
+    highscore_backgroud_rect = highscore_backgroud_surf.get_rect(center=(windows.get_width()/2, windows.get_height()/2))
+    pygame.draw.rect(windows, "Black", highscore_backgroud_rect, border_radius=10)
+    highscore_title_surf = h2_font.render("Highscore", False, "Yellow")
+    highscore_title_rect = highscore_title_surf.get_rect(midtop=(windows.get_width()/2, windows.get_height()/2 - 390))
+    windows.blit(highscore_title_surf, highscore_title_rect)
+    quit_text = font_text.render("Press Q to exit", False, (64, 64, 64))
+    quit_rect = quit_text.get_rect(midbottom=(windows.get_width()/2, windows.get_height()/2 + 390))
+    timeing = pygame.time.get_ticks()
+    if (timeing // 500) % 2 == 0:
+        windows.blit(quit_text, quit_rect)
+    try:
+        with open(verif.highscore_filename, 'r') as f:
+            content = json.load(f)
+    except (FileNotFoundError, json.decoder.JSONDecodeError):
+        pass
+    if content == {}:
+        no_score_recorded = font.render("No scores provided", False, "White")
+        no_score_recorded_rect = no_score_recorded.get_rect(center=(windows.get_width()/2, windows.get_height()/2))
+        windows.blit(no_score_recorded, no_score_recorded_rect)
+    else:
+        for i in content:
+            cpt += 1
+            if cpt > 10:
+                break
+            highscore_content_surf = font_text.render(f"{i} - {content[i]}", False, "White")
+            highscore_content_rect = highscore_content_surf.get_rect(topleft=(windows.get_width()/2 - 70, windows.get_height()/2 - (230 - ((cpt * 50)))))
+            windows.blit(highscore_content_surf, highscore_content_rect)
+            if cpt == 1:
+                windows.blit(gold_image, (windows.get_width()/2 - 130, windows.get_height()/2 - (230 - ((cpt * 50)))))
+            elif cpt == 2:
+                windows.blit(silver_image, (windows.get_width()/2 - 130, windows.get_height()/2 - (230 - ((cpt * 50)))))
+            elif cpt == 3:
+                windows.blit(bronze_image, (windows.get_width()/2 - 130, windows.get_height()/2 - (230 - ((cpt * 50)))))
+            else:
+                highscore_position_surf = font_text.render(f"{cpt}", False, "White")
+                windows.blit(highscore_position_surf, (windows.get_width()/2 - 110, windows.get_height()/2 - (230 - ((cpt * 50)))))
+
+
+def instruction_screen():
+    instruction_surf = pygame.image.load("image/instruction.png").convert_alpha()
+    instruction_surf = pygame.transform.scale(instruction_surf, (800, 800))
+    instruction_rect = instruction_surf.get_rect(center=(windows.get_width()/2, windows.get_height()/2))
+    windows.blit(instruction_surf, instruction_rect)
+
+
+def game_over_screen(blurred_background: pygame.Surface | None):
+    victory = pygame.image.load("image/game over.png").convert_alpha()
+    if blurred_background is None:
+        blurred_background = flou(windows)
+
+    windows.blit(blurred_background, (0, 0))
+    load_images_gameover_victory(victory, score, "Red")
+    name_user_surf = font.render(f"{name_user}", False, (64, 64, 64))
+    windows.blit(name_user_surf, (170, 450))
+    if len(name_user) < 1 and pressed >= 1:
+        error_message_surf = font_text.render("Please enter a minimum of 1 caracter", False, "Red")
+        error_message_rect = error_message_surf.get_rect(center=(windows.get_width()/2, 600))
+        windows.blit(error_message_surf, error_message_rect)
+    pygame.display.update()
+    return blurred_background
+
+
+def victory_screen(blurred_background: pygame.Surface | None):
+    victory = pygame.image.load("image/victory.png").convert_alpha()
+    if blurred_background is None:
+        blurred_background = flou(windows)
+
+    windows.blit(blurred_background, (0, 0))
+    load_images_gameover_victory(victory, score, "Yellow")
+    name_user_surf = font.render(f"{name_user}", False, (64, 64, 64))
+    windows.blit(name_user_surf, (170, 450))
+    pygame.display.update()
+    return blurred_background
+
+
+def pause_screen(blurred_background: pygame.Surface | None):
+    resume = font.render("Resume", False, "Yellow")
+    resume_rectangle = resume.get_rect(center=(SCREEN_WIDTH/2, 480))
+
+    stop_current_game = font.render("Main Menu", False, "Yellow")
+    stop_current_game_rect = stop_current_game.get_rect(center=(SCREEN_WIDTH/2, 550))
+    if blurred_background is None:
+        blurred_background = flou(windows)
+    if pause_choice == 0:
+        resume = font.render("Resume", False, "Red")
+        stop_current_game = font.render("Main Menu", False, "Yellow")
+    if pause_choice == -1:
+        resume = font.render("Resume", False, "Yellow")
+        stop_current_game = font.render("Main Menu", False, "Red")
+    windows.blit(blurred_background, (0, 0))
+    windows.blit(resume, resume_rectangle)
+    windows.blit(stop_current_game, stop_current_game_rect)
+    pygame.display.update()
+    return blurred_background
+
+
+def load_images_gameover_victory(image: pygame.Surface, score: int, color: str):
     image = pygame.transform.scale(image, (900, 600))
     image_rect = image.get_rect(center=(windows.get_width()/2, 200))
     windows.blit(image, image_rect)
@@ -229,12 +328,6 @@ h2_font = pygame.font.Font("Pixeltype.ttf", 250)
 font_text = pygame.font.Font("Pixeltype.ttf", 50)
 time_font = pygame.font.Font("Pixeltype.ttf", 500)
 
-resume = font.render("Resume", False, "Yellow")
-resume_rectangle = resume.get_rect(center=(SCREEN_WIDTH/2, 480))
-
-stop_current_game = font.render("Main Menu", False, "Yellow")
-stop_current_game_rect = stop_current_game.get_rect(center=(SCREEN_WIDTH/2, 550))
-
 gold_image = pygame.image.load("image/gold_medal.png").convert_alpha()
 gold_image = pygame.transform.scale(gold_image, (50, 50))
 
@@ -261,8 +354,8 @@ start_time = int(time())
 pause_start_time = 0
 time_inv = 0
 pause_choice = 0
-game_over_screen = False
-victory_screen = False
+game_over = False
+victory = False
 blurred_background = None
 initial_lives = verif.lives
 name_user = ""
@@ -316,7 +409,7 @@ while run:
             if choice == -3 and event.key == pygame.K_RETURN and pause is False:
                 pygame.quit()
                 exit()
-            if event.key == pygame.K_ESCAPE and active_game is True and game_over_screen is False and victory_screen is False and pause is False:
+            if event.key == pygame.K_ESCAPE and active_game is True and game_over is False and victory is False and pause is False:
                 pause_start_time = int(time())
                 pause = True
                 if pause:
@@ -340,20 +433,20 @@ while run:
                 pause = False
                 blurred_background = None
                 active_game = False
-            if event.key == pygame.K_ESCAPE and game_over_screen is True:
+            if event.key == pygame.K_ESCAPE and game_over is True:
                 active_game = False
-                game_over_screen = False
+                game_over = False
                 blurred_background = None
-            if event.key == pygame.K_ESCAPE and victory_screen is True:
+            if event.key == pygame.K_ESCAPE and victory is True:
                 active_game = False
-                victory_screen = False
+                victory = False
                 blurred_background = None
-            if event.key == pygame.K_BACKSPACE and (victory_screen is True or game_over_screen is True):
+            if event.key == pygame.K_BACKSPACE and (victory is True or game_over is True):
                 name_user = name_user[:-1]
-            elif victory_screen is True or game_over_screen is True:
+            elif victory is True or game_over is True:
                 if len(name_user) < 10 and (event.unicode.isalnum() or event.unicode == ' '):
                     name_user += event.unicode
-            if event.key == pygame.K_RETURN and (victory_screen is True or game_over_screen is True):
+            if event.key == pygame.K_RETURN and (victory is True or game_over is True):
                 pressed += 1
                 if len(name_user) >= 1:
                     active_game = False
@@ -387,49 +480,17 @@ while run:
                 if event.key == pygame.K_LCTRL:
                     cheat_mod = False
                     continue
-            if event.key == pygame.K_LCTRL and active_game is True and game_over_screen is False and victory_screen is False and pause is False:
-                print("cheat mod activated")
+            if event.key == pygame.K_LCTRL and active_game is True and game_over is False and victory is False and pause is False:
                 cheat_mod = True
     if active_game:
         if pause:
-            if blurred_background is None:
-                blurred_background = flou(windows)
-            windows.blit(blurred_background, (0, 0))
-            windows.blit(resume, resume_rectangle)
-            windows.blit(stop_current_game, stop_current_game_rect)
-            if pause_choice == 0:
-                resume = font.render("Resume", False, "Red")
-                stop_current_game = font.render("Main Menu", False, "Yellow")
-            if pause_choice == -1:
-                resume = font.render("Resume", False, "Yellow")
-                stop_current_game = font.render("Main Menu", False, "Red")
-            pygame.display.update()
+            blurred_background = pause_screen(blurred_background)
             continue
-        if game_over_screen:
-            victory = pygame.image.load("image/game over.png").convert_alpha()
-            if blurred_background is None:
-                blurred_background = flou(windows)
-
-            windows.blit(blurred_background, (0, 0))
-            victory_game_over_screen(victory, score, "Red")
-            name_user_surf = font.render(f"{name_user}", False, (64, 64, 64))
-            windows.blit(name_user_surf, (170, 450))
-            if len(name_user) < 1 and pressed >= 1:
-                error_message_surf = font_text.render("Please enter a minimum of 1 caracter", False, "Red")
-                error_message_rect = error_message_surf.get_rect(center=(windows.get_width()/2, 600))
-                windows.blit(error_message_surf, error_message_rect)
-            pygame.display.update()
+        if game_over:
+            blurred_background = game_over_screen(blurred_background)
             continue
-        if victory_screen:
-            victory = pygame.image.load("image/victory.png").convert_alpha()
-            if blurred_background is None:
-                blurred_background = flou(windows)
-
-            windows.blit(blurred_background, (0, 0))
-            victory_game_over_screen(victory, score, "Yellow")
-            name_user_surf = font.render(f"{name_user}", False, (64, 64, 64))
-            windows.blit(name_user_surf, (170, 450))
-            pygame.display.update()
+        if victory:
+            blurred_background = victory_screen(blurred_background)
             continue
         count += 1
         timer = verif.max_time + start_time - int(time())
@@ -506,14 +567,14 @@ while run:
             level += 1
             start_time = int(time())
             if level - 1 == verif.level:
-                victory_screen = True
+                victory = True
                 continue
 
         if p1.rect.colliderect(g1.rect) and int(time()) - g1.death_timer > 3:
             if g1.scared == 0:
                 verif.lives = verif.lives - 1
                 if verif.lives == 0:
-                    game_over_screen = True
+                    game_over = True
                     continue
                 p1.reset()
                 g1.reset()
@@ -529,7 +590,7 @@ while run:
             if g2.scared == 0:
                 verif.lives = verif.lives - 1
                 if verif.lives == 0:
-                    game_over_screen = True
+                    game_over = True
                     continue
                 p1.reset()
                 g1.reset()
@@ -545,7 +606,7 @@ while run:
             if g3.scared == 0:
                 verif.lives = verif.lives - 1
                 if verif.lives == 0:
-                    game_over_screen = True
+                    game_over = True
                     continue
                 p1.reset()
                 g1.reset()
@@ -561,7 +622,7 @@ while run:
             if g4.scared == 0:
                 verif.lives = verif.lives - 1
                 if verif.lives == 0:
-                    game_over_screen = True
+                    game_over = True
                     continue
                 p1.reset()
                 g1.reset()
@@ -574,7 +635,7 @@ while run:
                 g4.reset()
                 g4.death_timer = int(time())
         if verif.lives == 0 or timer == 0:
-            game_over_screen = True
+            game_over = True
             continue
         windows.blit(p1.choose_dir(p1.frames[count % 4], p1.dir), (p1.x, p1.y))
         if int(time()) - g1.death_timer > 3:
@@ -611,55 +672,15 @@ while run:
         verif.lives = initial_lives
         level = 1
         start_time = int(time())
-        victory_screen = False
-        game_over_screen = False
+        victory = False
+        game_over = False
         name_user = ""
         pressed = 0
-        cpt = 0
         cheat_mod = False
         main_menu()
         if instruction:
-            instruction_surf = pygame.image.load("image/instruction.png").convert_alpha()
-            instruction_surf = pygame.transform.scale(instruction_surf, (800, 800))
-            instruction_rect = instruction_surf.get_rect(center=(windows.get_width()/2, windows.get_height()/2))
-            windows.blit(instruction_surf, instruction_rect)
+            instruction_screen()
         if highscore:
-            highscore_backgroud_surf = pygame.Surface((800, 800))
-            highscore_backgroud_rect = highscore_backgroud_surf.get_rect(center=(windows.get_width()/2, windows.get_height()/2))
-            pygame.draw.rect(windows, "Black", highscore_backgroud_rect, border_radius=10)
-            highscore_title_surf = h2_font.render("Highscore", False, "Yellow")
-            highscore_title_rect = highscore_title_surf.get_rect(midtop=(windows.get_width()/2, windows.get_height()/2 - 390))
-            windows.blit(highscore_title_surf, highscore_title_rect)
-            quit_text = font_text.render("Press Q to exit", False, (64, 64, 64))
-            quit_rect = quit_text.get_rect(midbottom=(windows.get_width()/2, windows.get_height()/2 + 390))
-            timeing = pygame.time.get_ticks()
-            if (timeing // 500) % 2 == 0:
-                windows.blit(quit_text, quit_rect)
-            try:
-                with open(verif.highscore_filename, 'r') as f:
-                    content = json.load(f)
-            except (FileNotFoundError, json.decoder.JSONDecodeError):
-                pass
-            if content == {}:
-                no_score_recorded = font.render("No scores provided", False, "White")
-                no_score_recorded_rect = no_score_recorded.get_rect(center=(windows.get_width()/2, windows.get_height()/2))
-                windows.blit(no_score_recorded, no_score_recorded_rect)
-            else:
-                for i in content:
-                    cpt += 1
-                    if cpt > 10:
-                        break
-                    highscore_content_surf = font_text.render(f"{i} - {content[i]}", False, "White")
-                    highscore_content_rect = highscore_content_surf.get_rect(topleft=(windows.get_width()/2 - 70, windows.get_height()/2 - (230 - ((cpt * 50)))))
-                    windows.blit(highscore_content_surf, highscore_content_rect)
-                    if cpt == 1:
-                        windows.blit(gold_image, (windows.get_width()/2 - 130, windows.get_height()/2 - (230 - ((cpt * 50)))))
-                    elif cpt == 2:
-                        windows.blit(silver_image, (windows.get_width()/2 - 130, windows.get_height()/2 - (230 - ((cpt * 50)))))
-                    elif cpt == 3:
-                        windows.blit(bronze_image, (windows.get_width()/2 - 130, windows.get_height()/2 - (230 - ((cpt * 50)))))
-                    else:
-                        highscore_position_surf = font_text.render(f"{cpt}", False, "White")
-                        windows.blit(highscore_position_surf, (windows.get_width()/2 - 110, windows.get_height()/2 - (230 - ((cpt * 50)))))
+            highscore_screen(content)
     pygame.display.update()
 pygame.quit()
