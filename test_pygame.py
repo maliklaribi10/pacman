@@ -250,8 +250,8 @@ sprite = 1
 count = 0
 clock = pygame.time.Clock()
 next_dir = 0
-pacgum = create_pacgum(wall)
-superpacgum = create_superpacgum(wall)
+pacgum: set[tuple[int, int]] = create_pacgum(wall)
+superpacgum: set[tuple[int, int]] = create_superpacgum(wall)
 active_game = False
 exit_game = False
 choice = 0
@@ -269,6 +269,7 @@ name_user = ""
 pressed = 0
 highscore = False
 instruction = False
+cheat_mod = False
 content: dict[str, int] = {}
 cpt = 0
 p1 = char.Pacman(460, 460, CELL_SIZE)
@@ -375,6 +376,20 @@ while run:
                             json.dump(content, f, indent=4)
                     except (Exception):
                         pass
+            if cheat_mod:
+                if event.key == pygame.K_p:
+                    for i in range(len(pacgum)):
+                        score += verif.score_pacgum
+                    for j in range(len(superpacgum)):
+                        score += verif.score_superpacgum
+                    pacgum = set()
+                    superpacgum = set()
+                if event.key == pygame.K_LCTRL:
+                    cheat_mod = False
+                    continue
+            if event.key == pygame.K_LCTRL and active_game is True and game_over_screen is False and victory_screen is False and pause is False:
+                print("cheat mod activated")
+                cheat_mod = True
     if active_game:
         if pause:
             if blurred_background is None:
@@ -431,21 +446,21 @@ while run:
         if keys[pygame.K_t]:
             run = False
         p1.move(next_dir, wall)
-        if int(time()) - g1.death_timer > 3 and g1.scared == 0:
+        if int(time()) - g1.death_timer > 3 and g1.scared == 0 and cheat_mod is False:
             g1.move(p1.X, p1.Y, wall)
         elif g1.scared == 1:
             g1.flee(p1.X, p1.Y, wall)
-        if int(time()) - g2.death_timer > 3 and g2.scared == 0:
+        if int(time()) - g2.death_timer > 3 and g2.scared == 0 and cheat_mod is False:
             g2.move(p1.X, p1.Y, wall)
         elif g2.scared == 1:
             g2.flee(p1.X, p1.Y, wall)
-        if int(time()) - g3.death_timer > 3 and g3.scared == 0:
+        if int(time()) - g3.death_timer > 3 and g3.scared == 0 and cheat_mod is False:
             g3.move(p1.X, p1.Y, wall)
         elif g3.scared == 1:
             g3.flee(p1.X, p1.Y, wall)
-        if int(time()) - g4.death_timer > 3 and g4.scared == 0:
+        if int(time()) - g4.death_timer > 3 and g4.scared == 0 and cheat_mod is False:
             g4.move(p1.X, p1.Y, wall)
-        elif g4.scared == 1:
+        elif g4.scared == 1 and cheat_mod is False:
             g4.flee(p1.X, p1.Y, wall)
 
         windows.fill((0, 0, 0))
