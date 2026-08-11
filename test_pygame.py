@@ -446,21 +446,21 @@ while run:
         if keys[pygame.K_t]:
             run = False
         p1.move(next_dir, wall)
-        if int(time()) - g1.death_timer > 3 and g1.scared == 0 and cheat_mod is False:
+        if int(time()) - g1.death_timer > 3 and g1.scared == 0:
             g1.move(p1.X, p1.Y, wall)
         elif g1.scared == 1:
             g1.flee(p1.X, p1.Y, wall)
-        if int(time()) - g2.death_timer > 3 and g2.scared == 0 and cheat_mod is False:
+        if int(time()) - g2.death_timer > 3 and g2.scared == 0:
             g2.move(p1.X, p1.Y, wall)
         elif g2.scared == 1:
             g2.flee(p1.X, p1.Y, wall)
-        if int(time()) - g3.death_timer > 3 and g3.scared == 0 and cheat_mod is False:
+        if int(time()) - g3.death_timer > 3 and g3.scared == 0:
             g3.move(p1.X, p1.Y, wall)
         elif g3.scared == 1:
             g3.flee(p1.X, p1.Y, wall)
-        if int(time()) - g4.death_timer > 3 and g4.scared == 0 and cheat_mod is False:
+        if int(time()) - g4.death_timer > 3 and g4.scared == 0:
             g4.move(p1.X, p1.Y, wall)
-        elif g4.scared == 1 and cheat_mod is False:
+        elif g4.scared == 1:
             g4.flee(p1.X, p1.Y, wall)
 
         windows.fill((0, 0, 0))
@@ -616,6 +616,7 @@ while run:
         name_user = ""
         pressed = 0
         cpt = 0
+        cheat_mod = False
         main_menu()
         if instruction:
             instruction_surf = pygame.image.load("image/instruction.png").convert_alpha()
