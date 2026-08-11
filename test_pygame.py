@@ -236,6 +236,31 @@ def verif_config():
     return valid_file
 
 
+def exist_file(name_user: str):
+    if len(name_user) >= 1:
+        active_game = False
+        try:
+            with open(verif.highscore_filename, 'r') as f:
+                content = json.load(f)
+                if name_user in content.keys():
+                    if score > content[name_user]:
+                        content.update({name_user: score})
+                else:
+                    content.update({name_user: score})
+                content = dict(sorted(content.items(), key=lambda x: x[1], reverse=True))
+            with open(verif.highscore_filename, 'w') as f:
+                json.dump(content, f, indent=4)
+        except (FileNotFoundError, json.decoder.JSONDecodeError):
+            pass
+            # seulement si il arrive pas a ouvrir
+            with open(verif.highscore_filename, 'w') as f:
+                content = {name_user: score}
+                json.dump(content, f, indent=4)
+        except (Exception):
+            pass
+        return active_game
+
+
 def show_superpacgum(pacgum: set[tuple[int, int]]):
     for x, y in pacgum:
         center_x = x * CELL_SIZE + CELL_SIZE / 2
@@ -376,99 +401,91 @@ while run:
             pygame.quit()
             exit()
         if event.type == pygame.KEYDOWN:
-            if choice == 0 and pause is False and active_game is False and highscore is False and instruction is False:
-                if event.key == pygame.K_UP:
-                    choice = 0
-                if event.key == pygame.K_DOWN:
-                    choice = -1
-            elif choice == -1 and pause is False and active_game is False and highscore is False and instruction is False:
-                if event.key == pygame.K_UP:
-                    choice = 0
-                if event.key == pygame.K_DOWN:
-                    choice = -2
-            elif choice == -2 and pause is False and active_game is False and highscore is False and instruction is False:
-                if event.key == pygame.K_UP:
-                    choice = -1
-                if event.key == pygame.K_DOWN:
-                    choice = -3
-            elif choice == -3 and pause is False and active_game is False and highscore is False and instruction is False:
-                if event.key == pygame.K_UP:
-                    choice = -2
-                if event.key == pygame.K_DOWN:
-                    choice = -3
-            if choice == 0 and event.key == pygame.K_RETURN and pause is False:
-                active_game = True
-            if choice == -1 and event.key == pygame.K_RETURN and pause is False:
-                instruction = True
-            if instruction and event.key == pygame.K_q:
-                instruction = False
-            if choice == -2 and event.key == pygame.K_RETURN and pause is False:
-                highscore = True
-            if highscore and event.key == pygame.K_q:
-                highscore = False
-            if choice == -3 and event.key == pygame.K_RETURN and pause is False:
-                pygame.quit()
-                exit()
-            if event.key == pygame.K_ESCAPE and active_game is True and game_over is False and victory is False and pause is False:
-                pause_start_time = int(time())
-                pause = True
-                if pause:
-                    pause_choice = 0
-                    continue
-            if pause_choice == 0 and pause is True:
-                if event.key == pygame.K_UP:
-                    pause_choice = 0
-                if event.key == pygame.K_DOWN:
-                    pause_choice = -1
-            elif pause_choice == -1 and pause is True:
-                if event.key == pygame.K_UP:
-                    pause_choice = 0
-                if event.key == pygame.K_DOWN:
-                    pause_choice = -1
-            if pause_choice == 0 and event.key == pygame.K_RETURN and pause is True:
-                start_time += int(time()) - pause_start_time
-                pause = False
-                blurred_background = None
-            if pause_choice == -1 and event.key == pygame.K_RETURN and pause is True:
-                pause = False
-                blurred_background = None
-                active_game = False
-            if event.key == pygame.K_ESCAPE and game_over is True:
-                active_game = False
-                game_over = False
-                blurred_background = None
-            if event.key == pygame.K_ESCAPE and victory is True:
-                active_game = False
-                victory = False
-                blurred_background = None
-            if event.key == pygame.K_BACKSPACE and (victory is True or game_over is True):
-                name_user = name_user[:-1]
-            elif victory is True or game_over is True:
+            if not active_game:
+                if not pause and not highscore and not instruction:
+                    if choice == 0:
+                        if event.key == pygame.K_DOWN:
+                            choice = -1
+                        if event.key == pygame.K_RETURN:
+                            active_game = True
+                    elif choice == -1:
+                        if event.key == pygame.K_UP:
+                            choice = 0
+                        if event.key == pygame.K_DOWN:
+                            choice = -2
+                        if event.key == pygame.K_RETURN:
+                            instruction = True
+                    elif choice == -2:
+                        if event.key == pygame.K_UP:
+                            choice = -1
+                        if event.key == pygame.K_DOWN:
+                            choice = -3
+                        if event.key == pygame.K_RETURN:
+                            highscore = True
+                    elif choice == -3:
+                        if event.key == pygame.K_UP:
+                            choice = -2
+                        if event.key == pygame.K_RETURN:
+                            pygame.quit()
+                            exit()
+
+                if instruction:
+                    if event.key == pygame.K_q:
+                        instruction = False
+
+                if highscore:
+                    if event.key == pygame.K_q:
+                        highscore = False
+            else:
+                if not game_over and not victory and not pause:
+                    if event.key == pygame.K_ESCAPE:
+                        pause_start_time = int(time())
+                        pause = True
+                        pause_choice = 0
+                        continue
+
+                    if event.key == pygame.K_LCTRL:
+                        cheat_mod = True
+                        continue
+
+            if pause:
+                if pause_choice == 0:
+                    if event.key == pygame.K_DOWN:
+                        pause_choice = -1
+                    if event.key == pygame.K_RETURN:
+                        start_time += int(time()) - pause_start_time
+                        pause = False
+                        blurred_background = None
+                elif pause_choice == -1:
+                    if event.key == pygame.K_UP:
+                        pause_choice = 0
+                    if event.key == pygame.K_RETURN:
+                        pause = False
+                        blurred_background = None
+                        active_game = False
+
+            if game_over:
+                if event.key == pygame.K_ESCAPE:
+                    active_game = False
+                    game_over = False
+                    blurred_background = None
+
+            if victory:
+                if event.key == pygame.K_ESCAPE:
+                    active_game = False
+                    victory = False
+                    blurred_background = None
+
+            if victory or game_over:
+                if event.key == pygame.K_BACKSPACE:
+                    name_user = name_user[:-1]
                 if len(name_user) < 10 and (event.unicode.isalnum() or event.unicode == ' '):
                     name_user += event.unicode
-            if event.key == pygame.K_RETURN and (victory is True or game_over is True):
-                pressed += 1
-                if len(name_user) >= 1:
-                    active_game = False
-                    try:
-                        with open(verif.highscore_filename, 'r') as f:
-                            content = json.load(f)
-                            if name_user in content.keys():
-                                if score > content[name_user]:
-                                    content.update({name_user: score})
-                            else:
-                                content.update({name_user: score})
-                            content = dict(sorted(content.items(), key=lambda x: x[1], reverse=True))
-                        with open(verif.highscore_filename, 'w') as f:
-                            json.dump(content, f, indent=4)
-                    except (FileNotFoundError, json.decoder.JSONDecodeError):
-                        pass
-                        # seulement si il arrive pas a ouvrir
-                        with open(verif.highscore_filename, 'w') as f:
-                            content = {name_user: score}
-                            json.dump(content, f, indent=4)
-                    except (Exception):
-                        pass
+
+                if event.key == pygame.K_RETURN:
+                    pressed += 1
+                    active_game = exist_file(name_user)
+
             if cheat_mod:
                 if event.key == pygame.K_p:
                     for i in range(len(pacgum)):
@@ -479,9 +496,7 @@ while run:
                     superpacgum = set()
                 if event.key == pygame.K_LCTRL:
                     cheat_mod = False
-                    continue
-            if event.key == pygame.K_LCTRL and active_game is True and game_over is False and victory is False and pause is False:
-                cheat_mod = True
+
     if active_game:
         if pause:
             blurred_background = pause_screen(blurred_background)
