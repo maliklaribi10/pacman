@@ -315,7 +315,7 @@ while run:
             if choice == -3 and event.key == pygame.K_RETURN and pause is False:
                 pygame.quit()
                 exit()
-            if event.key == pygame.K_ESCAPE and active_game is True and game_over_screen is False and victory_screen is False:
+            if event.key == pygame.K_ESCAPE and active_game is True and game_over_screen is False and victory_screen is False and pause is False:
                 pause_start_time = int(time())
                 pause = True
                 if pause:
