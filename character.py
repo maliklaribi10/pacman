@@ -7,7 +7,15 @@ SCREEN_HEIGHT = 1050
 
 
 class Character():
+    """Représente un personnage du jeu."""
     def __init__(self, x: int, y: int, CELL_SIZE: int):
+        """Initialise le personnage.
+
+        Args:
+            x: Position horizontale.
+            y: Position verticale.
+            CELL_SIZE: Taille d'une cellule.
+        """
         self.x = x
         self.y = y
         self.X = int(x / CELL_SIZE)
@@ -22,6 +30,15 @@ class Character():
         self.start_y = y
 
     def check(self, dir: int, wall: int) -> bool:
+        """Vérifie si une direction est libre.
+
+        Args:
+            dir: Direction à vérifier.
+            wall: Murs de la cellule.
+
+        Returns:
+            bool: True si la direction est libre.
+        """
         if dir == 0:
             return False
         if (dir >> 0) & 1 == 0 and (wall >> 0) & 1 == 0:
@@ -35,6 +52,15 @@ class Character():
         return False
 
     def check_opposite(self, dir: int, next: int) -> bool:
+        """Vérifie si deux directions sont opposées.
+
+        Args:
+            dir: Direction actuelle.
+            next: Direction suivante.
+
+        Returns:
+            bool: True si les directions sont opposées.
+        """
         if dir == 14 and next == 11:
             return True
         if dir == 11 and next == 14:
@@ -46,6 +72,7 @@ class Character():
         return False
 
     def reset(self) -> None:
+        """Réinitialise le personnage à sa position de départ."""
         self.x = self.start_x
         self.y = self.start_y
         self.X = int(self.start_x / self.CELL_SIZE)
@@ -58,7 +85,15 @@ class Character():
 
 
 class Pacman(Character):
+    """Représente le personnage Pac-Man."""
     def __init__(self, x: int, y: int, CELL_SIZE: int):
+        """Initialise Pac-Man.
+
+        Args:
+            x: Position horizontale.
+            y: Position verticale.
+            CELL_SIZE: Taille d'une cellule.
+        """
         super().__init__(x, y, CELL_SIZE)
         self.frames = [
             pygame.image.load("d/pac0.png").convert_alpha(),
@@ -71,6 +106,15 @@ class Pacman(Character):
 
     @staticmethod
     def choose_dir(frame: Any, dir: int) -> Any:
+        """Oriente le sprite selon la direction.
+
+        Args:
+            frame: Image du sprite.
+            dir: Direction du personnage.
+
+        Returns:
+            Any: Sprite orienté.
+        """
         if dir == 7:
             frame = pygame.transform.rotate(frame, 180)
         if dir == 11:
@@ -82,6 +126,12 @@ class Pacman(Character):
         return frame
 
     def move(self, next_dir: int, wall: list[list[int]]):
+        """Déplace Pac-Man dans le labyrinthe.
+
+        Args:
+            next_dir: Direction souhaitée.
+            wall: Murs du labyrinthe.
+        """
         self.next_dir = next_dir
         self.rect = pygame.Rect(self.x, self.y, self.sprite.get_width(), self.sprite.get_height())
         if self.check_opposite(self.dir, self.next_dir):
@@ -115,7 +165,16 @@ class Pacman(Character):
 
 
 class Ghost(Character):
+    """Représente un fantôme du jeu."""
     def __init__(self, x: int, y: int, CELL_SIZE: int, color: str):
+        """Initialise un fantôme.
+
+        Args:
+            x: Position horizontale.
+            y: Position verticale.
+            CELL_SIZE: Taille d'une cellule.
+            color: Couleur du fantôme.
+        """
         super().__init__(x, y, CELL_SIZE)
         self.frames = [
             pygame.transform.scale(pygame.image.load(f"ghost/{color}/f0.png").convert_alpha(), (32, 32)),
@@ -142,6 +201,16 @@ class Ghost(Character):
         g_coor: tuple[int, int],
         maze: list[list[int]]
          ) -> int:
+        """Cherche le chemin vers Pac-Man.
+
+        Args:
+            p_coor: Position de Pac-Man.
+            g_coor: Position du fantôme.
+            maze: Grille du labyrinthe.
+
+        Returns:
+            int: Direction à suivre.
+        """
         directions = [
             (1, 0, -1),   # NORTH
             (2, 1, 0),    # EAST
@@ -205,6 +274,13 @@ class Ghost(Character):
             return 7
 
     def move(self, X: int, Y: int, wall: list[list[int]]) -> None:
+        """Déplace le fantôme vers Pac-Man.
+
+        Args:
+            X: Position horizontale de Pac-Man.
+            Y: Position verticale de Pac-Man.
+            wall: Murs du labyrinthe.
+        """
         if self.reX == 10 and self.reY == 10:
             self.speed = 5
         self.rect = pygame.Rect(self.x, self.y, self.sprite.get_width(), self.sprite.get_height())
@@ -237,6 +313,13 @@ class Ghost(Character):
         self.reY = self.y % self.CELL_SIZE
 
     def flee(self, X: int, Y: int, wall: list[list[int]]) -> None:
+        """Éloigne le fantôme de Pac-Man.
+
+        Args:
+            X: Position horizontale de Pac-Man.
+            Y: Position verticale de Pac-Man.
+            wall: Murs du labyrinthe.
+        """
         self.speed = 2.5
         self.rect = pygame.Rect(self.x, self.y, self.sprite.get_width(), self.sprite.get_height())
         dir_pos = [7, 11, 13, 14]
@@ -273,11 +356,18 @@ class Ghost(Character):
         self.reY = self.y % self.CELL_SIZE
 
     def reset(self) -> None:
+        """Réinitialise le fantôme à sa position de départ."""
         super().reset()
         self.scared = 0
         self.death_timer = 0
 
     def show(self, count: int, windows: Surface) -> None:
+        """Affiche le fantôme.
+
+        Args:
+            count: Compteur d'animation.
+            windows: Surface d'affichage.
+        """
         if self.scared == 1:
             windows.blit(self.scared_frames[count % 8], (self.x, self.y))
         else:

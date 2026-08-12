@@ -11,6 +11,7 @@ import character as char
 
 
 class Json(BaseModel):
+    """Stocke et valide la configuration du jeu."""
     highscore_filename: str = Field(min_length=1, default="score.json")
     level: int = Field(ge=1, default=10)
     width: int = Field(default=20)
@@ -25,12 +26,28 @@ class Json(BaseModel):
 
     @model_validator(mode="after")
     def filename_validator(self) -> Self:
+        """Vérifie le format du fichier de score.
+
+        Raises:
+            ValueError: Si le fichier n'est pas au format JSON.
+
+        Returns:
+            Self: La configuration validée.
+        """
         if not self.highscore_filename.endswith(".json"):
             raise ValueError("Votre fichier doit absolument etre un .json")
         return self
 
     @model_validator(mode="after")
     def pacgum_validator(self) -> Self:
+        """Vérifie le nombre de pac-gums.
+
+        Raises:
+            ValueError: Si le nombre de pac-gums est trop élevé.
+
+        Returns:
+            Self: La configuration validée.
+        """
         if self.pacgum > self.width * self.height - 22:
             raise ValueError("Le nombre de pacgum est trop grand pour un labyrinthe de cette taille")
         return self
@@ -41,7 +58,8 @@ SCREEN_HEIGHT = 1050
 # CELL_SIZE = SCREEN_WIDTH // WIDTH
 
 
-def main_menu():
+def main_menu() -> None:
+    """Affiche le menu principal."""
     title_surface = h1_font.render("Pac-Man", False, "Red")
     title_rectangle = title_surface.get_rect(center=(SCREEN_WIDTH/2, 200))
 
@@ -86,7 +104,15 @@ def main_menu():
     windows.blit(sortie, sortie_rectangle)
 
 
-def flou(screen: pygame.Surface):
+def flou(screen: pygame.Surface) -> pygame.Surface:
+    """Applique un effet de flou à l'écran.
+
+    Args:
+        screen: Surface à flouter.
+
+    Returns:
+        pygame.Surface: Surface floutée.
+    """
     screen_copy = screen.copy()
 
     small = pygame.transform.smoothscale(
@@ -102,7 +128,12 @@ def flou(screen: pygame.Surface):
     return blurred
 
 
-def highscore_screen(content: dict[str, Any]):
+def highscore_screen(content: dict[str, Any]) -> None:
+    """Affiche les meilleurs scores.
+
+    Args:
+        content: Dictionnaire contenant les scores.
+    """
     cpt = 0
     highscore_backgroud_surf = pygame.Surface((800, 800))
     highscore_backgroud_rect = highscore_backgroud_surf.get_rect(center=(windows.get_width()/2, windows.get_height()/2))
@@ -143,14 +174,23 @@ def highscore_screen(content: dict[str, Any]):
                 windows.blit(highscore_position_surf, (windows.get_width()/2 - 110, windows.get_height()/2 - (230 - ((cpt * 50)))))
 
 
-def instruction_screen():
+def instruction_screen() -> None:
+    """Affiche les instructions du jeu."""
     instruction_surf = pygame.image.load("image/instruction.png").convert_alpha()
     instruction_surf = pygame.transform.scale(instruction_surf, (800, 800))
     instruction_rect = instruction_surf.get_rect(center=(windows.get_width()/2, windows.get_height()/2))
     windows.blit(instruction_surf, instruction_rect)
 
 
-def game_over_screen(blurred_background: pygame.Surface | None):
+def game_over_screen(blurred_background: pygame.Surface | None) -> pygame.Surface:
+    """Affiche l'écran de défaite.
+
+    Args:
+        blurred_background: Arrière-plan déjà flouté ou pas.
+
+    Returns:
+        pygame.Surface: Arrière-plan flouté.
+    """
     victory = pygame.image.load("image/game over.png").convert_alpha()
     if blurred_background is None:
         blurred_background = flou(windows)
@@ -167,7 +207,15 @@ def game_over_screen(blurred_background: pygame.Surface | None):
     return blurred_background
 
 
-def victory_screen(blurred_background: pygame.Surface | None):
+def victory_screen(blurred_background: pygame.Surface | None) -> pygame.Surface:
+    """Affiche l'écran de défaite.
+
+    Args:
+        blurred_background: Arrière-plan déjà flouté ou pas.
+
+    Returns:
+        pygame.Surface: Arrière-plan flouté.
+    """
     victory = pygame.image.load("image/victory.png").convert_alpha()
     if blurred_background is None:
         blurred_background = flou(windows)
@@ -180,7 +228,15 @@ def victory_screen(blurred_background: pygame.Surface | None):
     return blurred_background
 
 
-def pause_screen(blurred_background: pygame.Surface | None):
+def pause_screen(blurred_background: pygame.Surface | None) -> pygame.Surface:
+    """Affiche le menu pause.
+
+    Args:
+        blurred_background: Arrière-plan déjà flouté ou pas.
+
+    Returns:
+        pygame.Surface: Arrière-plan flouté.
+    """
     resume = font.render("Resume", False, "Yellow")
     resume_rectangle = resume.get_rect(center=(SCREEN_WIDTH/2, 480))
 
@@ -201,7 +257,14 @@ def pause_screen(blurred_background: pygame.Surface | None):
     return blurred_background
 
 
-def load_images_gameover_victory(image: pygame.Surface, score: int, color: str):
+def load_images_gameover_victory(image: pygame.Surface, score: int, color: str) -> None:
+    """Affiche les éléments de l'écran de fin.
+
+    Args:
+        image: Image de victoire ou de défaite.
+        score: Score du joueur.
+        color: Couleur du texte.
+    """
     image = pygame.transform.scale(image, (900, 600))
     image_rect = image.get_rect(center=(windows.get_width()/2, 200))
     windows.blit(image, image_rect)
@@ -225,7 +288,17 @@ def load_images_gameover_victory(image: pygame.Surface, score: int, color: str):
         windows.blit(exit_surf, exit_rect)
 
 
-def verif_config():
+def verif_config() -> Json:
+    """Charge et valide la configuration.
+
+    Raises:
+        ValueError: Si le nombre d'arguments est incorrect.
+        FileNotFoundError: Si le fichier est introuvable.
+        json.JSONDecodeError: Si le fichier est invalide.
+
+    Returns:
+        Json: Configuration validée.
+    """
     file = {}
     if len(sys.argv) != 2:
         raise ValueError("Trop ou trop peu d'arguments")
@@ -236,7 +309,16 @@ def verif_config():
     return valid_file
 
 
-def exist_file(name_user: str):
+def store_score(name_user: str) -> bool:
+    """Enregistre le score du joueur.
+
+    Args:
+        name_user: Nom du joueur.
+
+    Returns:
+        bool: Indique si le jeu reste actif si le joueur a entrer un nom
+              superieur a un caractere.
+    """
     if len(name_user) >= 1:
         active_game = False
         try:
@@ -259,9 +341,16 @@ def exist_file(name_user: str):
         except (Exception):
             pass
         return active_game
+    else:
+        return True
 
 
-def show_superpacgum(pacgum: set[tuple[int, int]]):
+def show_superpacgum(pacgum: set[tuple[int, int]]) -> None:
+    """Affiche les super pac-gums.
+
+    Args:
+        pacgum: Positions des super pac-gums.
+    """
     for x, y in pacgum:
         center_x = x * CELL_SIZE + CELL_SIZE / 2
         center_y = y * CELL_SIZE + CELL_SIZE / 2
@@ -272,7 +361,12 @@ def show_superpacgum(pacgum: set[tuple[int, int]]):
         pygame.draw.rect(windows, "Orange", objet_rect, border_radius=40)
 
 
-def create_superpacgum(maze_grid: list[list[int]]):
+def create_superpacgum() -> set[tuple[int, int]]:
+    """Crée les super pac-gums.
+
+    Returns:
+        set[tuple[int, int]]: Positions des super pac-gums.
+    """
     superpacgum: set[tuple[int, int]] = set()
     seed(None)
 
@@ -284,10 +378,18 @@ def create_superpacgum(maze_grid: list[list[int]]):
     return superpacgum
 
 
-def create_pacgum(maze_grid: list[list[int]]):
+def create_pacgum(maze_grid: list[list[int]]) -> set[tuple[int, int]]:
+    """Crée les pac-gums dans le labyrinthe.
+
+    Args:
+        maze_grid: Grille du labyrinthe.
+
+    Returns:
+        set[tuple[int, int]]: Positions des pac-gums.
+    """
     pacgum: set[tuple[int, int]] = set()
     seed(None)
-    superpacgum = create_superpacgum(maze_grid)
+    superpacgum = create_superpacgum()
 
     while len(pacgum) != verif.pacgum:
         width = randint(0, verif.width - 1)
@@ -299,7 +401,12 @@ def create_pacgum(maze_grid: list[list[int]]):
     return pacgum
 
 
-def show_pacgum(pacgum: set[tuple[int, int]]):
+def show_pacgum(pacgum: set[tuple[int, int]]) -> None:
+    """Affiche les pac-gums.
+
+    Args:
+        pacgum: Positions des pac-gums.
+    """
     for x, y in pacgum:
         center_x = x * CELL_SIZE + CELL_SIZE / 2
         center_y = y * CELL_SIZE + CELL_SIZE / 2
@@ -310,7 +417,8 @@ def show_pacgum(pacgum: set[tuple[int, int]]):
         pygame.draw.rect(windows, "Orange", objet_rect, border_radius=40)
 
 
-def show_maze():
+def show_maze() -> None:
+    """Affiche le labyrinthe."""
     surface_pos_x = 0
     surface_pos_y = 0
     for _ in range(len(wall[0])):
@@ -344,6 +452,9 @@ except json.decoder.JSONDecodeError:
 except FileNotFoundError:
     print("Le fichier config n'existe pas")
     exit()
+except ValueError:
+    print("Il y a trop ou trop peu d'argument")
+    exit()
 CELL_SIZE = SCREEN_WIDTH // verif.width
 maze = MazeGenerator((verif.width, verif.height))
 maze.generate()
@@ -376,7 +487,7 @@ count = 0
 clock = pygame.time.Clock()
 next_dir = 0
 pacgum: set[tuple[int, int]] = create_pacgum(wall)
-superpacgum: set[tuple[int, int]] = create_superpacgum(wall)
+superpacgum: set[tuple[int, int]] = create_superpacgum()
 active_game = False
 exit_game = False
 choice = 0
@@ -491,7 +602,7 @@ while run:
 
                 if event.key == pygame.K_RETURN:
                     pressed += 1
-                    active_game = exist_file(name_user)
+                    active_game = store_score(name_user)
 
             if cheat_mod:
                 if event.key == pygame.K_p:
@@ -585,7 +696,7 @@ while run:
             g4.reset()
             next_dir = 0
             pacgum = create_pacgum(wall)
-            superpacgum = create_superpacgum(wall)
+            superpacgum = create_superpacgum()
             level += 1
             start_time = int(time())
             if level - 1 == verif.level:
@@ -689,7 +800,7 @@ while run:
         g4.reset()
         next_dir = 0
         pacgum = create_pacgum(wall)
-        superpacgum = create_superpacgum(wall)
+        superpacgum = create_superpacgum()
         score = 0
         verif.lives = initial_lives
         level = 1
