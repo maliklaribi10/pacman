@@ -2,7 +2,7 @@
     "highscore_filename": "highscore.json",
     "level": 10,
     "lives": 3,
-    "pacgum": 1,
+    "pacgum": 200,
     "score_pacgum": 10,
     "score_superpacgum": 50,
     "score_ghost": 200,

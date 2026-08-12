@@ -223,6 +223,10 @@ def victory_screen(blurred_background: pygame.Surface | None) -> pygame.Surface:
     load_images_gameover_victory(victory, score, "Yellow")
     name_user_surf = font.render(f"{name_user}", False, (64, 64, 64))
     windows.blit(name_user_surf, (170, 450))
+    if len(name_user) < 1 and pressed >= 1:
+        error_message_surf = font_text.render("Please enter a minimum of 1 caracter", False, "Yellow")
+        error_message_rect = error_message_surf.get_rect(center=(windows.get_width()/2, 600))
+        windows.blit(error_message_surf, error_message_rect)
     pygame.display.update()
     return blurred_background
 
