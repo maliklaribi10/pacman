@@ -13,8 +13,8 @@ import character as char
 class Json(BaseModel):
     highscore_filename: str = Field(min_length=1, default="score.json")
     level: int = Field(ge=1, default=10)
-    width: int = Field(ge=10, default=20)
-    height: int = Field(ge=10, default=20)
+    width: int = Field(default=20)
+    height: int = Field(default=20)
     lives: int = Field(ge=1, default=5)
     pacgum: int = Field(ge=1)
     score_pacgum: int = Field(ge=1, default=10)
@@ -336,7 +336,14 @@ def show_maze():
         surface_pos_y += CELL_SIZE
 
 
-verif = verif_config()
+try:
+    verif = verif_config()
+except json.decoder.JSONDecodeError:
+    print("Le fichier n'est pas en format json ou est complement vide")
+    exit()
+except FileNotFoundError:
+    print("Le fichier config n'existe pas")
+    exit()
 CELL_SIZE = SCREEN_WIDTH // verif.width
 maze = MazeGenerator((verif.width, verif.height))
 maze.generate()
