@@ -8,7 +8,7 @@ SCREEN_HEIGHT = 1050
 
 class Character():
     """Représente un personnage du jeu."""
-    def __init__(self, x: int, y: int, CELL_SIZE: int):
+    def __init__(self, x: float, y: float, CELL_SIZE: int):
         """Initialise le personnage.
 
         Args:
@@ -20,7 +20,7 @@ class Character():
         self.y = y
         self.X = int(x / CELL_SIZE)
         self.Y = int(y / CELL_SIZE)
-        self.speed = 5
+        self.speed = 5.0
         self.dir = 0
         self.reX = x % CELL_SIZE
         self.reY = y % CELL_SIZE
@@ -272,6 +272,7 @@ class Ghost(Character):
             return 11
         if path[1][0] == g_coor[0] - 1 and path[1][1] == g_coor[1]:
             return 7
+        return 0
 
     def move(self, X: int, Y: int, wall: list[list[int]]) -> None:
         """Déplace le fantôme vers Pac-Man.
@@ -282,7 +283,7 @@ class Ghost(Character):
             wall: Murs du labyrinthe.
         """
         if self.reX == 10 and self.reY == 10:
-            self.speed = 5
+            self.speed = 5.0
         self.rect = pygame.Rect(self.x, self.y, self.sprite.get_width(), self.sprite.get_height())
         self.next_dir = self.chase((X, Y), (self.X, self.Y), wall)
         if self.check(self.next_dir, wall[self.Y][self.X]) and self.reX == 10 and self.reY == 10:
