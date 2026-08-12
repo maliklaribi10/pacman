@@ -3,8 +3,8 @@
 install:
 	poetry install
 
-run: 
-	poetry run python3 test_pygame.py config.json
+run:
+	poetry run python3 pac-man.py config.json
 
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} +
