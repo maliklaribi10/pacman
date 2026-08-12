@@ -55,7 +55,6 @@ class Json(BaseModel):
 
 SCREEN_WIDTH = 1001
 SCREEN_HEIGHT = 1050
-# CELL_SIZE = SCREEN_WIDTH // WIDTH
 
 
 def main_menu() -> None:
