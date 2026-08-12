@@ -13,7 +13,7 @@ import character as char
 class Json(BaseModel):
     """Stocke et valide la configuration du jeu."""
     highscore_filename: str = Field(min_length=1, default="score.json")
-    level: int = Field(ge=1, default=10)
+    level: int = Field(ge=10, default=10)
     width: int = Field(default=20)
     height: int = Field(default=20)
     lives: int = Field(ge=1, default=5)
