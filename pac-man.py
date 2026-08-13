@@ -751,7 +751,7 @@ while run:
                 continue
 
         # if p1.rect.colliderect(g1.rect) and int(time()) - g1.death_timer > 3:
-        if g1.rect == p1.rect and int(time()) - g1.death_timer > 3:
+        if p1.collide(g1.x, g1.y) and int(time()) - g1.death_timer > 3:
             if g1.scared == 0:
                 verif.lives = verif.lives - 1
                 if verif.lives == 0:
@@ -768,7 +768,7 @@ while run:
                 g1.reset()
                 g1.death_timer = int(time())
         # if p1.rect.colliderect(g2.rect) and int(time()) - g2.death_timer > 3:
-        if g2.rect == p1.rect and int(time()) - g1.death_timer > 3:
+        if p1.collide(g2.x, g2.y) and int(time()) - g1.death_timer > 3:
             if g2.scared == 0:
                 verif.lives = verif.lives - 1
                 if verif.lives == 0:
@@ -785,7 +785,7 @@ while run:
                 g2.reset()
                 g2.death_timer = int(time())
         # if p1.rect.colliderect(g3.rect) and int(time()) - g3.death_timer > 3:
-        if g3.rect == p1.rect and int(time()) - g1.death_timer > 3:
+        if p1.collide(g3.x, g3.y) and int(time()) - g1.death_timer > 3:
             if g3.scared == 0:
                 verif.lives = verif.lives - 1
                 if verif.lives == 0:
@@ -802,7 +802,7 @@ while run:
                 g3.reset()
                 g3.death_timer = int(time())
         # if p1.rect.colliderect(g4.rect) and int(time()) - g4.death_timer > 3:
-        if g4.rect == p1.rect and int(time()) - g1.death_timer > 3:
+        if p1.collide(g4.x, g4.y) and int(time()) - g1.death_timer > 3:
             if g4.scared == 0:
                 verif.lives = verif.lives - 1
                 if verif.lives == 0:
