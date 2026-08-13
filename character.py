@@ -1,7 +1,6 @@
 import pygame
 from typing import Any
 from pygame import Surface
-from math import ceil
 
 SCREEN_WIDTH = 1001
 SCREEN_HEIGHT = 1050
@@ -135,8 +134,6 @@ class Pacman(Character):
             wall: Murs du labyrinthe.
         """
         self.next_dir = next_dir
-        # self.rect = pygame.Rect(
-        #     self.x, self.y, self.sprite.get_width(), self.sprite.get_height())
         if self.check_opposite(self.dir, self.next_dir):
             self.dir = self.next_dir
         if self.check(self.next_dir, wall[self.Y][self.X])\
@@ -166,8 +163,6 @@ class Pacman(Character):
                 pass
             else:
                 self.y += self.speed
-        # self.X = self.rect.centerx // self.CELL_SIZE
-        # self.Y = self.rect.centery // self.CELL_SIZE
         self.X = int(self.x // self.CELL_SIZE)
         self.Y = int(self.y // self.CELL_SIZE)
         self.reX = self.x % self.CELL_SIZE
@@ -293,8 +288,6 @@ class Ghost(Character):
             path.append(current_position)
             current_position = parents_children[current_position]
         path.reverse()
-        # print(path)
-        # print(g_coor)
         if path[1][0] == g_coor[0] and path[1][1] == g_coor[1] - 1:
             return 14
         if path[1][0] == g_coor[0] + 1 and path[1][1] == g_coor[1]:
@@ -315,8 +308,6 @@ class Ghost(Character):
         """
         if self.reX == 10 and self.reY == 10:
             self.speed = 5.0
-        # self.rect = pygame.Rect(
-            # self.x, self.y, self.sprite.get_width(), self.sprite.get_height())
         self.next_dir = self.chase((X, Y), (self.X, self.Y), wall)
         if self.check(self.next_dir, wall[self.Y][self.X])\
                 and self.reX == 10 and self.reY == 10:
@@ -345,8 +336,6 @@ class Ghost(Character):
                 pass
             else:
                 self.y += self.speed
-        # self.X = self.rect.centerx // self.CELL_SIZE
-        # self.Y = self.rect.centery // self.CELL_SIZE
         self.X = int(self.x // self.CELL_SIZE)
         self.Y = int(self.y // self.CELL_SIZE)
         self.reX = self.x % self.CELL_SIZE
@@ -361,8 +350,6 @@ class Ghost(Character):
             wall: Murs du labyrinthe.
         """
         self.speed = 2.5
-        # self.rect = pygame.Rect(
-            # self.x, self.y, self.sprite.get_width(), self.sprite.get_height())
         dir_pos = [7, 11, 13, 14]
         self.next_dir = self.chase((X, Y), (self.X, self.Y), wall)
         if self.next_dir == 0:
@@ -396,8 +383,6 @@ class Ghost(Character):
                 pass
             else:
                 self.y += self.speed
-        # self.X = self.rect.centerx // self.CELL_SIZE
-        # self.Y = self.rect.centery // self.CELL_SIZE
         self.X = int(self.x // self.CELL_SIZE)
         self.Y = int(self.y // self.CELL_SIZE)
         self.reX = self.x % self.CELL_SIZE
