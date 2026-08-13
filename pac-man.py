@@ -721,19 +721,22 @@ while run:
         show_pacgum(pacgum)
         show_superpacgum(superpacgum)
 
-        if (p1.X, p1.Y) in pacgum:
+        pac_x = int((p1.x + p1.sprite.get_width() / 2) // CELL_SIZE)
+        pac_y = int((p1.y + p1.sprite.get_height() / 2) // CELL_SIZE)
+
+        if (pac_x, pac_y) in pacgum:
             score += verif.score_pacgum
-            pacgum.remove((p1.X, p1.Y))
+            pacgum.remove((pac_x, pac_y))
             show_pacgum(pacgum)
 
-        if (p1.X, p1.Y) in superpacgum:
+        if (pac_x, pac_y) in superpacgum:
             score += verif.score_superpacgum
             g1.scared = 1
             g2.scared = 1
             g3.scared = 1
             g4.scared = 1
             time_inv = int(time())
-            superpacgum.remove((p1.X, p1.Y))
+            superpacgum.remove((pac_x, pac_y))
             show_superpacgum(superpacgum)
         if int(time()) - time_inv == 5:
             g1.scared = 0
