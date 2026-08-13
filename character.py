@@ -171,11 +171,7 @@ class Pacman(Character):
         self.reY = self.y % self.CELL_SIZE
 
     def collide(self, x: float, y: float) -> bool:
-        if abs(self.x - x) < 30 and self.y == y:
-            return True
-        if abs(self.y - y) < 30 and self.x == x:
-            return True
-        return False
+        return abs(self.y - y) < 30 and abs(self.x - x) < 30
 
 
 class Ghost(Character):

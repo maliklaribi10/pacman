@@ -59,6 +59,14 @@ SCREEN_WIDTH = 1001
 SCREEN_HEIGHT = 1050
 
 
+def resetall() -> None:
+    p1.reset()
+    g1.reset()
+    g2.reset()
+    g3.reset()
+    g4.reset()
+
+
 def main_menu() -> None:
     """Affiche le menu principal."""
     title_surface = h1_font.render("Pac-Man", False, "Red")
@@ -736,11 +744,7 @@ while run:
             maze = MazeGenerator((verif.width, verif.height))
             maze.generate()
             wall = maze.maze
-            p1.reset()
-            g1.reset()
-            g2.reset()
-            g3.reset()
-            g4.reset()
+            resetall()
             next_dir = 0
             pacgum = create_pacgum(wall)
             superpacgum = create_superpacgum()
@@ -751,68 +755,52 @@ while run:
                 continue
 
         # if p1.rect.colliderect(g1.rect) and int(time()) - g1.death_timer > 3:
-        if p1.collide(g1.x, g1.y) and int(time()) - g1.death_timer > 3:
+        if p1.collide(g1.x, g1.y) and int(time()) - g2.death_timer > 3:
             if g1.scared == 0:
                 verif.lives = verif.lives - 1
                 if verif.lives == 0:
                     game_over = True
                     continue
-                p1.reset()
-                g1.reset()
-                g2.reset()
-                g3.reset()
-                g4.reset()
+                resetall()
                 next_dir = 0
             else:
                 score += verif.score_ghost
                 g1.reset()
                 g1.death_timer = int(time())
         # if p1.rect.colliderect(g2.rect) and int(time()) - g2.death_timer > 3:
-        if p1.collide(g2.x, g2.y) and int(time()) - g1.death_timer > 3:
+        if p1.collide(g2.x, g2.y) and int(time()) - g2.death_timer > 3:
             if g2.scared == 0:
                 verif.lives = verif.lives - 1
                 if verif.lives == 0:
                     game_over = True
                     continue
-                p1.reset()
-                g1.reset()
-                g2.reset()
-                g3.reset()
-                g4.reset()
+                resetall()
                 next_dir = 0
             else:
                 score += verif.score_ghost
                 g2.reset()
                 g2.death_timer = int(time())
         # if p1.rect.colliderect(g3.rect) and int(time()) - g3.death_timer > 3:
-        if p1.collide(g3.x, g3.y) and int(time()) - g1.death_timer > 3:
+        if p1.collide(g3.x, g3.y) and int(time()) - g3.death_timer > 3:
             if g3.scared == 0:
                 verif.lives = verif.lives - 1
                 if verif.lives == 0:
                     game_over = True
                     continue
-                p1.reset()
-                g1.reset()
-                g2.reset()
-                g3.reset()
-                g4.reset()
+                resetall()
                 next_dir = 0
             else:
                 score += verif.score_ghost
                 g3.reset()
                 g3.death_timer = int(time())
         # if p1.rect.colliderect(g4.rect) and int(time()) - g4.death_timer > 3:
-        if p1.collide(g4.x, g4.y) and int(time()) - g1.death_timer > 3:
+        if p1.collide(g4.x, g4.y) and int(time()) - g4.death_timer > 3:
             if g4.scared == 0:
                 verif.lives = verif.lives - 1
                 if verif.lives == 0:
                     game_over = True
                     continue
-                p1.reset()
-                g1.reset()
-                g2.reset()
-                g3.reset()
-                g4.reset()
+                resetall()
                 next_dir = 0
             else:
                 score += verif.score_ghost
@@ -846,11 +834,7 @@ while run:
         maze = MazeGenerator((verif.width, verif.height))
         maze.generate(verif.seed)
         wall = maze.maze
-        p1.reset()
-        g1.reset()
-        g2.reset()
-        g3.reset()
-        g4.reset()
+        resetall()
         next_dir = 0
         pacgum = create_pacgum(wall)
         superpacgum = create_superpacgum()
