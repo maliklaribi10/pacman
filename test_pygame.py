@@ -259,6 +259,8 @@ def exist_file(name_user: str):
         except (Exception):
             pass
         return active_game
+    else:
+        return True
 
 
 def show_superpacgum(pacgum: set[tuple[int, int]]):
@@ -649,7 +651,7 @@ while run:
                 score += verif.score_ghost
                 g4.reset()
                 g4.death_timer = int(time())
-        if verif.lives == 0 or timer == 0:
+        if timer == 0:
             game_over = True
             continue
         windows.blit(p1.choose_dir(p1.frames[count % 4], p1.dir), (p1.x, p1.y))
