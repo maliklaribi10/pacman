@@ -49,7 +49,9 @@ class Json(BaseModel):
             Self: La configuration validée.
         """
         if self.pacgum > self.width * self.height - 22:
-            raise ValueError("Le nombre de pacgum est trop grand pour un labyrinthe de cette taille")
+            raise ValueError(
+                "Le nombre de pacgum est trop grand" +
+                "pour un labyrinthe de cette taille")
         return self
 
 
@@ -135,13 +137,17 @@ def highscore_screen(content: dict[str, Any]) -> None:
     """
     cpt = 0
     highscore_backgroud_surf = pygame.Surface((800, 800))
-    highscore_backgroud_rect = highscore_backgroud_surf.get_rect(center=(windows.get_width()/2, windows.get_height()/2))
-    pygame.draw.rect(windows, "Black", highscore_backgroud_rect, border_radius=10)
+    highscore_backgroud_rect = highscore_backgroud_surf.get_rect(
+        center=(windows.get_width()/2, windows.get_height()/2))
+    pygame.draw.rect(
+        windows, "Black", highscore_backgroud_rect, border_radius=10)
     highscore_title_surf = h2_font.render("Highscore", False, "Yellow")
-    highscore_title_rect = highscore_title_surf.get_rect(midtop=(windows.get_width()/2, windows.get_height()/2 - 390))
+    highscore_title_rect = highscore_title_surf.get_rect(
+        midtop=(windows.get_width()/2, windows.get_height()/2 - 390))
     windows.blit(highscore_title_surf, highscore_title_rect)
     quit_text = font_text.render("Press Q to exit", False, (64, 64, 64))
-    quit_rect = quit_text.get_rect(midbottom=(windows.get_width()/2, windows.get_height()/2 + 390))
+    quit_rect = quit_text.get_rect(
+        midbottom=(windows.get_width()/2, windows.get_height()/2 + 390))
     timeing = pygame.time.get_ticks()
     if (timeing // 500) % 2 == 0:
         windows.blit(quit_text, quit_rect)
@@ -152,36 +158,54 @@ def highscore_screen(content: dict[str, Any]) -> None:
         pass
     if content == {}:
         no_score_recorded = font.render("No scores provided", False, "White")
-        no_score_recorded_rect = no_score_recorded.get_rect(center=(windows.get_width()/2, windows.get_height()/2))
+        no_score_recorded_rect = no_score_recorded.get_rect(center=(
+            windows.get_width()/2, windows.get_height()/2))
         windows.blit(no_score_recorded, no_score_recorded_rect)
     else:
         for i in content:
             cpt += 1
             if cpt > 10:
                 break
-            highscore_content_surf = font_text.render(f"{i} - {content[i]}", False, "White")
-            highscore_content_rect = highscore_content_surf.get_rect(topleft=(windows.get_width()/2 - 70, windows.get_height()/2 - (230 - ((cpt * 50)))))
+            highscore_content_surf = font_text.render(
+                f"{i} - {content[i]}", False, "White")
+            highscore_content_rect = highscore_content_surf.get_rect(
+                topleft=(windows.get_width()/2 - 70,
+                         windows.get_height()/2 - (230 - ((cpt * 50)))))
             windows.blit(highscore_content_surf, highscore_content_rect)
             if cpt == 1:
-                windows.blit(gold_image, (windows.get_width()/2 - 130, windows.get_height()/2 - (230 - ((cpt * 50)))))
+                windows.blit(gold_image,
+                             (windows.get_width()/2 - 130,
+                              windows.get_height()/2 - (230 - ((cpt * 50)))))
             elif cpt == 2:
-                windows.blit(silver_image, (windows.get_width()/2 - 130, windows.get_height()/2 - (230 - ((cpt * 50)))))
+                windows.blit(silver_image,
+                             (windows.get_width()/2 - 130,
+                              windows.get_height()/2 - (230 - ((cpt * 50)))))
             elif cpt == 3:
-                windows.blit(bronze_image, (windows.get_width()/2 - 130, windows.get_height()/2 - (230 - ((cpt * 50)))))
+                windows.blit(bronze_image,
+                             (windows.get_width()/2 - 130,
+                              windows.get_height()/2 - (230 - ((cpt * 50)))))
             else:
-                highscore_position_surf = font_text.render(f"{cpt}", False, "White")
-                windows.blit(highscore_position_surf, (windows.get_width()/2 - 110, windows.get_height()/2 - (230 - ((cpt * 50)))))
+                highscore_position_surf = font_text.render(
+                    f"{cpt}", False, "White")
+                windows.blit(
+                    highscore_position_surf,
+                    (windows.get_width()/2 - 110,
+                     windows.get_height()/2 - (230 - ((cpt * 50)))))
 
 
 def instruction_screen() -> None:
     """Affiche les instructions du jeu."""
-    instruction_surf = pygame.image.load("image/instruction.png").convert_alpha()
+    instruction_surf = pygame.image.load(
+        "image/instruction.png").convert_alpha()
     instruction_surf = pygame.transform.scale(instruction_surf, (800, 800))
-    instruction_rect = instruction_surf.get_rect(center=(windows.get_width()/2, windows.get_height()/2))
+    instruction_rect = instruction_surf.get_rect(
+        center=(windows.get_width()/2, windows.get_height()/2))
     windows.blit(instruction_surf, instruction_rect)
 
 
-def game_over_screen(blurred_background: pygame.Surface | None) -> pygame.Surface:
+def game_over_screen(
+        blurred_background: pygame.Surface | None
+        ) -> pygame.Surface:
     """Affiche l'écran de défaite.
 
     Args:
@@ -199,14 +223,18 @@ def game_over_screen(blurred_background: pygame.Surface | None) -> pygame.Surfac
     name_user_surf = font.render(f"{name_user}", False, (64, 64, 64))
     windows.blit(name_user_surf, (170, 450))
     if len(name_user) < 1 and pressed >= 1:
-        error_message_surf = font_text.render("Please enter a minimum of 1 caracter", False, "Red")
-        error_message_rect = error_message_surf.get_rect(center=(windows.get_width()/2, 600))
+        error_message_surf = font_text.render(
+            "Please enter a minimum of 1 caracter", False, "Red")
+        error_message_rect = error_message_surf.get_rect(
+            center=(windows.get_width()/2, 600))
         windows.blit(error_message_surf, error_message_rect)
     pygame.display.update()
     return blurred_background
 
 
-def victory_screen(blurred_background: pygame.Surface | None) -> pygame.Surface:
+def victory_screen(
+        blurred_background: pygame.Surface | None
+        ) -> pygame.Surface:
     """Affiche l'écran de défaite.
 
     Args:
@@ -224,8 +252,10 @@ def victory_screen(blurred_background: pygame.Surface | None) -> pygame.Surface:
     name_user_surf = font.render(f"{name_user}", False, (64, 64, 64))
     windows.blit(name_user_surf, (170, 450))
     if len(name_user) < 1 and pressed >= 1:
-        error_message_surf = font_text.render("Please enter a minimum of 1 caracter", False, "Yellow")
-        error_message_rect = error_message_surf.get_rect(center=(windows.get_width()/2, 600))
+        error_message_surf = font_text.render(
+            "Please enter a minimum of 1 caracter", False, "Yellow")
+        error_message_rect = error_message_surf.get_rect(
+            center=(windows.get_width()/2, 600))
         windows.blit(error_message_surf, error_message_rect)
     pygame.display.update()
     return blurred_background
@@ -244,7 +274,8 @@ def pause_screen(blurred_background: pygame.Surface | None) -> pygame.Surface:
     resume_rectangle = resume.get_rect(center=(SCREEN_WIDTH/2, 480))
 
     stop_current_game = font.render("Main Menu", False, "Yellow")
-    stop_current_game_rect = stop_current_game.get_rect(center=(SCREEN_WIDTH/2, 550))
+    stop_current_game_rect = stop_current_game.get_rect(
+        center=(SCREEN_WIDTH/2, 550))
     if blurred_background is None:
         blurred_background = flou(windows)
     if pause_choice == 0:
@@ -260,7 +291,10 @@ def pause_screen(blurred_background: pygame.Surface | None) -> pygame.Surface:
     return blurred_background
 
 
-def load_images_gameover_victory(image: pygame.Surface, score: int, color: str) -> None:
+def load_images_gameover_victory(
+        image: pygame.Surface,
+        score: int, color: str
+        ) -> None:
     """Affiche les éléments de l'écran de fin.
 
     Args:
@@ -278,13 +312,16 @@ def load_images_gameover_victory(image: pygame.Surface, score: int, color: str) 
     text_rect = text_surf.get_rect(center=(windows.get_width()/2, 400))
     windows.blit(text_surf, text_rect)
     rectangle_surf = pygame.Surface((700, 100))
-    rectangle_rect = rectangle_surf.get_rect(center=(windows.get_width()/2, 480))
+    rectangle_rect = rectangle_surf.get_rect(
+        center=(windows.get_width()/2, 480))
     pygame.draw.rect(windows, color, rectangle_rect, 3, border_radius=10)
-    confirm_surf = font_text.render("Press ENTER to confirm", False, (64, 64, 64))
+    confirm_surf = font_text.render(
+        "Press ENTER to confirm", False, (64, 64, 64))
     confirm_rect = confirm_surf.get_rect(center=(windows.get_width()/2, 560))
     windows.blit(confirm_surf, confirm_rect)
     exit_surf = font_text.render("Press ECHAP to skip", False, (64, 64, 64))
-    exit_rect = exit_surf.get_rect(midbottom=(windows.get_width()/2, windows.get_height() - 10))
+    exit_rect = exit_surf.get_rect(
+        midbottom=(windows.get_width()/2, windows.get_height() - 10))
     time = pygame.time.get_ticks()
 
     if (time // 500) % 2 == 0:
@@ -332,7 +369,8 @@ def store_score(name_user: str) -> bool:
                         content.update({name_user: score})
                 else:
                     content.update({name_user: score})
-                content = dict(sorted(content.items(), key=lambda x: x[1], reverse=True))
+                content = dict(
+                    sorted(content.items(), key=lambda x: x[1], reverse=True))
             with open(verif.highscore_filename, 'w') as f:
                 json.dump(content, f, indent=4)
         except (FileNotFoundError, json.decoder.JSONDecodeError):
@@ -358,7 +396,8 @@ def show_superpacgum(pacgum: set[tuple[int, int]]) -> None:
         center_x = x * CELL_SIZE + CELL_SIZE / 2
         center_y = y * CELL_SIZE + CELL_SIZE / 2
 
-        objet = pygame.Surface((max(2, CELL_SIZE // 3), max(2, CELL_SIZE // 3)))
+        objet = pygame.Surface(
+            (max(2, CELL_SIZE // 3), max(2, CELL_SIZE // 3)))
         objet_rect = objet.get_rect(center=(center_x, center_y))
 
         pygame.draw.rect(windows, "Orange", objet_rect, border_radius=40)
@@ -397,7 +436,8 @@ def create_pacgum(maze_grid: list[list[int]]) -> set[tuple[int, int]]:
     while len(pacgum) != verif.pacgum:
         width = randint(0, verif.width - 1)
         height = randint(0, verif.height - 1)
-        if maze_grid[height][width] != 15 and (width, height) not in superpacgum:
+        if maze_grid[height][width] != 15\
+                and (width, height) not in superpacgum:
             pacgum.add((width, height))
         continue
 
@@ -414,7 +454,8 @@ def show_pacgum(pacgum: set[tuple[int, int]]) -> None:
         center_x = x * CELL_SIZE + CELL_SIZE / 2
         center_y = y * CELL_SIZE + CELL_SIZE / 2
 
-        objet = pygame.Surface((max(2, CELL_SIZE // 10), max(2, CELL_SIZE // 10)))
+        objet = pygame.Surface(
+            (max(2, CELL_SIZE // 10), max(2, CELL_SIZE // 10)))
         objet_rect = objet.get_rect(center=(center_x, center_y))
 
         pygame.draw.rect(windows, "Orange", objet_rect, border_radius=40)
@@ -439,7 +480,8 @@ def show_maze() -> None:
         for element in i:
             if ((element >> 1) & 1) != 0:
                 vertical_wall.fill("White")
-                windows.blit(vertical_wall, (surface_pos_x + CELL_SIZE, surface_pos_y - CELL_SIZE))
+                windows.blit(vertical_wall, (
+                    surface_pos_x + CELL_SIZE, surface_pos_y - CELL_SIZE))
             if ((element >> 2) & 1) != 0:
                 horizontal_wall.fill("White")
                 windows.blit(horizontal_wall, (surface_pos_x, surface_pos_y))
@@ -600,7 +642,8 @@ while run:
             if victory or game_over:
                 if event.key == pygame.K_BACKSPACE:
                     name_user = name_user[:-1]
-                if len(name_user) < 10 and (event.unicode.isalnum() or event.unicode == ' '):
+                if len(name_user) < 10\
+                        and (event.unicode.isalnum() or event.unicode == ' '):
                     name_user += event.unicode
 
                 if event.key == pygame.K_RETURN:
@@ -662,8 +705,9 @@ while run:
 
         windows.fill((0, 0, 0))
         timer_surface = time_font.render(f"{timer}", False, (64, 64, 64))
-        timer_rect = timer_surface.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
-        timer_surface.set_alpha(128)  # rendre transparent du texte 128 moitie de 256 donc 50% de transparence
+        timer_rect = timer_surface.get_rect(
+            center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
+        timer_surface.set_alpha(128)
         windows.blit(timer_surface, timer_rect)
         show_maze()
         show_pacgum(pacgum)
@@ -706,7 +750,8 @@ while run:
                 victory = True
                 continue
 
-        if p1.rect.colliderect(g1.rect) and int(time()) - g1.death_timer > 3:
+        # if p1.rect.colliderect(g1.rect) and int(time()) - g1.death_timer > 3:
+        if g1.rect == p1.rect and int(time()) - g1.death_timer > 3:
             if g1.scared == 0:
                 verif.lives = verif.lives - 1
                 if verif.lives == 0:
@@ -722,7 +767,8 @@ while run:
                 score += verif.score_ghost
                 g1.reset()
                 g1.death_timer = int(time())
-        if p1.rect.colliderect(g2.rect) and int(time()) - g2.death_timer > 3:
+        # if p1.rect.colliderect(g2.rect) and int(time()) - g2.death_timer > 3:
+        if g2.rect == p1.rect and int(time()) - g1.death_timer > 3:
             if g2.scared == 0:
                 verif.lives = verif.lives - 1
                 if verif.lives == 0:
@@ -738,7 +784,8 @@ while run:
                 score += verif.score_ghost
                 g2.reset()
                 g2.death_timer = int(time())
-        if p1.rect.colliderect(g3.rect) and int(time()) - g3.death_timer > 3:
+        # if p1.rect.colliderect(g3.rect) and int(time()) - g3.death_timer > 3:
+        if g3.rect == p1.rect and int(time()) - g1.death_timer > 3:
             if g3.scared == 0:
                 verif.lives = verif.lives - 1
                 if verif.lives == 0:
@@ -754,7 +801,8 @@ while run:
                 score += verif.score_ghost
                 g3.reset()
                 g3.death_timer = int(time())
-        if p1.rect.colliderect(g4.rect) and int(time()) - g4.death_timer > 3:
+        # if p1.rect.colliderect(g4.rect) and int(time()) - g4.death_timer > 3:
+        if g4.rect == p1.rect and int(time()) - g1.death_timer > 3:
             if g4.scared == 0:
                 verif.lives = verif.lives - 1
                 if verif.lives == 0:
@@ -785,10 +833,12 @@ while run:
         score_surface = font_text.render(f"{score}", False, (64, 64, 64))
         score_rect = score_surface.get_rect(bottomright=(990, 1050))
         windows.blit(score_surface, score_rect)
-        life_text = font_text.render(f"Life: {verif.lives}", False, (64, 64, 64))
+        life_text = font_text.render(
+            f"Life: {verif.lives}", False, (64, 64, 64))
         life_rect = life_text.get_rect(midbottom=(SCREEN_WIDTH/2, 1050))
         windows.blit(life_text, life_rect)
-        current_level = font_text.render(f"Level: {level}", False, (64, 64, 64))
+        current_level = font_text.render(
+            f"Level: {level}", False, (64, 64, 64))
         current_level_rect = current_level.get_rect(bottomleft=(5, 1050))
         windows.blit(current_level, current_level_rect)
         pygame.display.flip()
