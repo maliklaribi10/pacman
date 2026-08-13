@@ -755,7 +755,7 @@ while run:
                 continue
 
         # if p1.rect.colliderect(g1.rect) and int(time()) - g1.death_timer > 3:
-        if p1.collide(g1.x, g1.y) and int(time()) - g2.death_timer > 3:
+        if p1.collide(g1.x, g1.y) and int(time()) - g1.death_timer > 3:
             if g1.scared == 0:
                 verif.lives = verif.lives - 1
                 if verif.lives == 0:
