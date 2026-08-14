@@ -247,7 +247,7 @@ character.py
 The graphical assets are organized in dedicated directories.
 
 ```text
-d/
+pacman/
 ├── pac0.png
 ├── pac1.png
 ├── pac2.png
