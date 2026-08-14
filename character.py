@@ -97,8 +97,12 @@ class Pacman(Character):
         super().__init__(x, y, CELL_SIZE)
         self.frames = [
             pygame.image.load("pacman/pac0.png").convert_alpha(),
+            pygame.image.load("pacman/pac0.png").convert_alpha(),
+            pygame.image.load("pacman/pac1.png").convert_alpha(),
             pygame.image.load("pacman/pac1.png").convert_alpha(),
             pygame.image.load("pacman/pac2.png").convert_alpha(),
+            pygame.image.load("pacman/pac2.png").convert_alpha(),
+            pygame.image.load("pacman/pac3.png").convert_alpha(),
             pygame.image.load("pacman/pac3.png").convert_alpha()
             ]
         self.sprite = self.frames[0]
@@ -169,7 +173,7 @@ class Pacman(Character):
         self.reY = self.y % self.CELL_SIZE
 
     def collide(self, x: float, y: float) -> bool:
-        return abs(self.y - y) < 30 and abs(self.x - x) < 30
+        return abs(self.y - y) < 20 and abs(self.x - x) < 20
 
 
 class Ghost(Character):
@@ -296,7 +300,7 @@ class Ghost(Character):
             return 11
         if path[1][0] == g_coor[0] - 1 and path[1][1] == g_coor[1]:
             return 7
-        return 0
+        return 7
 
     def move(self, X: int, Y: int, wall: list[list[int]]) -> None:
         """Déplace le fantôme vers Pac-Man.

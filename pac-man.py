@@ -757,7 +757,6 @@ while run:
                 victory = True
                 continue
 
-        # if p1.rect.colliderect(g1.rect) and int(time()) - g1.death_timer > 3:
         if p1.collide(g1.x, g1.y) and int(time()) - g1.death_timer > 3:
             if g1.scared == 0:
                 verif.lives = verif.lives - 1
@@ -770,7 +769,6 @@ while run:
                 score += verif.score_ghost
                 g1.reset()
                 g1.death_timer = int(time())
-        # if p1.rect.colliderect(g2.rect) and int(time()) - g2.death_timer > 3:
         if p1.collide(g2.x, g2.y) and int(time()) - g2.death_timer > 3:
             if g2.scared == 0:
                 verif.lives = verif.lives - 1
@@ -783,7 +781,6 @@ while run:
                 score += verif.score_ghost
                 g2.reset()
                 g2.death_timer = int(time())
-        # if p1.rect.colliderect(g3.rect) and int(time()) - g3.death_timer > 3:
         if p1.collide(g3.x, g3.y) and int(time()) - g3.death_timer > 3:
             if g3.scared == 0:
                 verif.lives = verif.lives - 1
@@ -796,7 +793,6 @@ while run:
                 score += verif.score_ghost
                 g3.reset()
                 g3.death_timer = int(time())
-        # if p1.rect.colliderect(g4.rect) and int(time()) - g4.death_timer > 3:
         if p1.collide(g4.x, g4.y) and int(time()) - g4.death_timer > 3:
             if g4.scared == 0:
                 verif.lives = verif.lives - 1
@@ -812,7 +808,7 @@ while run:
         if timer == 0:
             game_over = True
             continue
-        windows.blit(p1.choose_dir(p1.frames[count % 4], p1.dir), (p1.x, p1.y))
+        windows.blit(p1.choose_dir(p1.frames[count % 8], p1.dir), (p1.x, p1.y))
         if int(time()) - g1.death_timer > 3:
             g1.show(count, windows)
         if int(time()) - g2.death_timer > 3:
