@@ -96,10 +96,10 @@ class Pacman(Character):
         """
         super().__init__(x, y, CELL_SIZE)
         self.frames = [
-            pygame.image.load("d/pac0.png").convert_alpha(),
-            pygame.image.load("d/pac1.png").convert_alpha(),
-            pygame.image.load("d/pac2.png").convert_alpha(),
-            pygame.image.load("d/pac3.png").convert_alpha()
+            pygame.image.load("pacman/pac0.png").convert_alpha(),
+            pygame.image.load("pacman/pac1.png").convert_alpha(),
+            pygame.image.load("pacman/pac2.png").convert_alpha(),
+            pygame.image.load("pacman/pac3.png").convert_alpha()
             ]
         self.sprite = self.frames[0]
         self.rect = pygame.Rect(
