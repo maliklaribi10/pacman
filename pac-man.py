@@ -660,7 +660,8 @@ if __name__ == "__main__":
                     if event.key == pygame.K_BACKSPACE:
                         name_user = name_user[:-1]
                     if len(name_user) < 10\
-                            and (event.unicode.isalnum() or event.unicode == ' '):
+                            and (event.unicode.isalnum()
+                                 or event.unicode == ' '):
                         name_user += event.unicode
 
                     if event.key == pygame.K_RETURN:
@@ -817,7 +818,8 @@ if __name__ == "__main__":
             if timer == 0:
                 game_over = True
                 continue
-            windows.blit(p1.choose_dir(p1.frames[count % 8], p1.dir), (p1.x, p1.y))
+            windows.blit(
+                p1.choose_dir(p1.frames[count % 8], p1.dir), (p1.x, p1.y))
             if int(time()) - g1.death_timer > 3:
                 g1.show(count, windows)
             if int(time()) - g2.death_timer > 3:

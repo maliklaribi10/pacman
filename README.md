@@ -286,6 +286,18 @@ config.json
 highscore.json
 ```
 
+the executable:
+
+```text
+pac-man
+pac-man.spec
+```
+
+The maze .whl you have to install:
+
+```text
+mazegenerator-2.1.0-py3-none-any.whl
+```
 ---
 
 # General Software Architecture
@@ -341,17 +353,21 @@ This makes it possible to modify sprites, screens and fonts without changing the
 ├── pac-man.py
 ├── Makefile
 ├── pyproject.toml
+├── pac-man
+├── pac-man.spec
 ├── d/
 │   ├── pac0.png
 │   ├── pac1.png
 │   ├── pac2.png
 │   ├── pac3.png
-│   └── ghost/
-│       ├── blue/
-│       ├── orange/
-│       ├── pink/
-│       ├── red/
-│       └── scared/
+├── ghost/
+│   ├── blue/
+│   ├── orange/
+│   ├── pink/
+│   ├── red/
+│   └── scared/
+├── maze/
+│   ├── mazegenerator-2.1.0-py3-none-any.whl/
 ├── image/
 │   ├── bronze_medal.png
 │   ├── game_over.png
