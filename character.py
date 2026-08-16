@@ -356,9 +356,8 @@ class Ghost(Character):
         self.speed = 2.5
         dir_pos = [7, 11, 13, 14]
         self.next_dir = self.chase((X, Y), (self.X, self.Y), wall)
-        if self.next_dir == 0:
-            return
-        dir_pos.remove(self.next_dir)
+        if self.next_dir != 0:
+            dir_pos.remove(self.next_dir)
         for next_dir in dir_pos:
             if self.check(next_dir, wall[self.Y][self.X])\
                     and self.reX == 10 and self.reY == 10:

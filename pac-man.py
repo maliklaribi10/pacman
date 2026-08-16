@@ -6,7 +6,7 @@ from random import randint, seed
 import sys
 import json
 from time import time
-from pydantic import Field, BaseModel, model_validator
+from pydantic import Field, BaseModel, model_validator, ValidationError
 import character as char
 
 
@@ -349,7 +349,7 @@ def verif_config() -> Json:
     """
     file = {}
     if len(sys.argv) != 2:
-        raise ValueError("Trop ou trop peu d'arguments")
+        raise Exception("Trop ou trop peu d'arguments")
     name_file = sys.argv[1]
     with open(name_file, "r") as f:
         file = json.load(f)
@@ -497,359 +497,368 @@ def show_maze() -> None:
         surface_pos_y += CELL_SIZE
 
 
-try:
-    verif = verif_config()
-except json.decoder.JSONDecodeError:
-    print("Le fichier n'est pas en format json ou est complement vide")
-    exit()
-except FileNotFoundError:
-    print("Le fichier config n'existe pas")
-    exit()
-except ValueError:
-    print("Il y a trop ou trop peu d'argument")
-    exit()
-CELL_SIZE = SCREEN_WIDTH // verif.width
-maze = MazeGenerator((verif.width, verif.height))
-maze.generate()
-wall = maze.maze
-pygame.init()
-windows = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), RESIZABLE)
-vertical_wall = pygame.Surface((1, CELL_SIZE))
-horizontal_wall = pygame.Surface((CELL_SIZE, 1))
-vertical_wall.fill("White")
-horizontal_wall.fill("White")
-font = pygame.font.Font("police/Pixeltype.ttf", 100)
-h1_font = pygame.font.Font("police/Pixeltype.ttf", 300)
-h2_font = pygame.font.Font("police/Pixeltype.ttf", 250)
-font_text = pygame.font.Font("police/Pixeltype.ttf", 50)
-time_font = pygame.font.Font("police/Pixeltype.ttf", 500)
+if __name__ == "__main__":
+    try:
+        verif = verif_config()
+    except json.decoder.JSONDecodeError:
+        print("Le fichier n'est pas en format json ou est complement vide")
+        sys.exit()
+    except FileNotFoundError:
+        print("Le fichier config n'existe pas")
+        sys.exit()
+    except ValidationError as e:
+        try:
+            print(f"{e.errors()[0]["loc"][0]}: {e.errors()[0]["msg"]}")
+            sys.exit()
+        except IndexError:
+            pass
+        print(f"{e.errors()[0]["msg"]}")
+        sys.exit()
+    except Exception as e:
+        print(e)
+        sys.exit()
+    CELL_SIZE = SCREEN_WIDTH // verif.width
+    maze = MazeGenerator((verif.width, verif.height))
+    maze.generate()
+    wall = maze.maze
+    pygame.init()
+    windows = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), RESIZABLE)
+    vertical_wall = pygame.Surface((1, CELL_SIZE))
+    horizontal_wall = pygame.Surface((CELL_SIZE, 1))
+    vertical_wall.fill("White")
+    horizontal_wall.fill("White")
+    font = pygame.font.Font("police/Pixeltype.ttf", 100)
+    h1_font = pygame.font.Font("police/Pixeltype.ttf", 300)
+    h2_font = pygame.font.Font("police/Pixeltype.ttf", 250)
+    font_text = pygame.font.Font("police/Pixeltype.ttf", 50)
+    time_font = pygame.font.Font("police/Pixeltype.ttf", 500)
 
-gold_image = pygame.image.load("image/gold_medal.png").convert_alpha()
-gold_image = pygame.transform.scale(gold_image, (50, 50))
+    gold_image = pygame.image.load("image/gold_medal.png").convert_alpha()
+    gold_image = pygame.transform.scale(gold_image, (50, 50))
 
-silver_image = pygame.image.load("image/silver_medal.png").convert_alpha()
-silver_image = pygame.transform.scale(silver_image, (50, 50))
+    silver_image = pygame.image.load("image/silver_medal.png").convert_alpha()
+    silver_image = pygame.transform.scale(silver_image, (50, 50))
 
-bronze_image = pygame.image.load("image/bronze_medal.png").convert_alpha()
-bronze_image = pygame.transform.scale(bronze_image, (50, 50))
+    bronze_image = pygame.image.load("image/bronze_medal.png").convert_alpha()
+    bronze_image = pygame.transform.scale(bronze_image, (50, 50))
 
-run = True
-score = 0
-sprite = 1
-count = 0
-clock = pygame.time.Clock()
-next_dir = 0
-pacgum: set[tuple[int, int]] = create_pacgum(wall)
-superpacgum: set[tuple[int, int]] = create_superpacgum()
-active_game = False
-exit_game = False
-choice = 0
-pause = False
-level = 1
-start_time = int(time())
-pause_start_time = 0
-time_inv = 0
-pause_choice = 0
-game_over = False
-victory = False
-blurred_background = None
-initial_lives = verif.lives
-name_user = ""
-pressed = 0
-highscore = False
-instruction = False
-cheat_mod = False
-content: dict[str, int] = {}
-cpt = 0
-p1 = char.Pacman(460, 460, CELL_SIZE)
-g1 = char.Ghost(960, 960, CELL_SIZE, "red")
-g2 = char.Ghost(10, 960, CELL_SIZE, "pink")
-g3 = char.Ghost(960, 10, CELL_SIZE, "blue")
-g4 = char.Ghost(10, 10, CELL_SIZE, "orange")
-while run:
-    for event in pygame.event.get():
-        if event.type == QUIT:
-            pygame.quit()
-            exit()
-        if event.type == pygame.KEYDOWN:
-            if not active_game:
-                if not pause and not highscore and not instruction:
-                    if choice == 0:
+    run = True
+    score = 0
+    sprite = 1
+    count = 0
+    clock = pygame.time.Clock()
+    next_dir = 0
+    pacgum: set[tuple[int, int]] = create_pacgum(wall)
+    superpacgum: set[tuple[int, int]] = create_superpacgum()
+    active_game = False
+    exit_game = False
+    choice = 0
+    pause = False
+    level = 1
+    start_time = int(time())
+    pause_start_time = 0
+    time_inv = 0
+    pause_choice = 0
+    game_over = False
+    victory = False
+    blurred_background = None
+    initial_lives = verif.lives
+    name_user = ""
+    pressed = 0
+    highscore = False
+    instruction = False
+    cheat_mod = False
+    content: dict[str, int] = {}
+    cpt = 0
+    p1 = char.Pacman(460, 460, CELL_SIZE)
+    g1 = char.Ghost(960, 960, CELL_SIZE, "red")
+    g2 = char.Ghost(10, 960, CELL_SIZE, "pink")
+    g3 = char.Ghost(960, 10, CELL_SIZE, "blue")
+    g4 = char.Ghost(10, 10, CELL_SIZE, "orange")
+    while run:
+        for event in pygame.event.get():
+            if event.type == QUIT:
+                pygame.quit()
+                sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if not active_game:
+                    if not pause and not highscore and not instruction:
+                        if choice == 0:
+                            if event.key == pygame.K_DOWN:
+                                choice = -1
+                            if event.key == pygame.K_RETURN:
+                                active_game = True
+                        elif choice == -1:
+                            if event.key == pygame.K_UP:
+                                choice = 0
+                            if event.key == pygame.K_DOWN:
+                                choice = -2
+                            if event.key == pygame.K_RETURN:
+                                instruction = True
+                        elif choice == -2:
+                            if event.key == pygame.K_UP:
+                                choice = -1
+                            if event.key == pygame.K_DOWN:
+                                choice = -3
+                            if event.key == pygame.K_RETURN:
+                                highscore = True
+                        elif choice == -3:
+                            if event.key == pygame.K_UP:
+                                choice = -2
+                            if event.key == pygame.K_RETURN:
+                                pygame.quit()
+                                sys.exit()
+
+                    if instruction:
+                        if event.key == pygame.K_q:
+                            instruction = False
+
+                    if highscore:
+                        if event.key == pygame.K_q:
+                            highscore = False
+                else:
+                    if not game_over and not victory and not pause:
+                        if event.key == pygame.K_ESCAPE:
+                            pause_start_time = int(time())
+                            pause = True
+                            pause_choice = 0
+                            continue
+
+                        if event.key == pygame.K_LCTRL:
+                            cheat_mod = True
+                            continue
+
+                if pause:
+                    if pause_choice == 0:
                         if event.key == pygame.K_DOWN:
-                            choice = -1
+                            pause_choice = -1
                         if event.key == pygame.K_RETURN:
-                            active_game = True
-                    elif choice == -1:
+                            start_time += int(time()) - pause_start_time
+                            pause = False
+                            blurred_background = None
+                    elif pause_choice == -1:
                         if event.key == pygame.K_UP:
-                            choice = 0
-                        if event.key == pygame.K_DOWN:
-                            choice = -2
+                            pause_choice = 0
                         if event.key == pygame.K_RETURN:
-                            instruction = True
-                    elif choice == -2:
-                        if event.key == pygame.K_UP:
-                            choice = -1
-                        if event.key == pygame.K_DOWN:
-                            choice = -3
-                        if event.key == pygame.K_RETURN:
-                            highscore = True
-                    elif choice == -3:
-                        if event.key == pygame.K_UP:
-                            choice = -2
-                        if event.key == pygame.K_RETURN:
-                            pygame.quit()
-                            exit()
+                            pause = False
+                            blurred_background = None
+                            active_game = False
 
-                if instruction:
-                    if event.key == pygame.K_q:
-                        instruction = False
-
-                if highscore:
-                    if event.key == pygame.K_q:
-                        highscore = False
-            else:
-                if not game_over and not victory and not pause:
+                if game_over:
                     if event.key == pygame.K_ESCAPE:
-                        pause_start_time = int(time())
-                        pause = True
-                        pause_choice = 0
-                        continue
-
-                    if event.key == pygame.K_LCTRL:
-                        cheat_mod = True
-                        continue
-
-            if pause:
-                if pause_choice == 0:
-                    if event.key == pygame.K_DOWN:
-                        pause_choice = -1
-                    if event.key == pygame.K_RETURN:
-                        start_time += int(time()) - pause_start_time
-                        pause = False
-                        blurred_background = None
-                elif pause_choice == -1:
-                    if event.key == pygame.K_UP:
-                        pause_choice = 0
-                    if event.key == pygame.K_RETURN:
-                        pause = False
-                        blurred_background = None
                         active_game = False
+                        game_over = False
+                        blurred_background = None
 
+                if victory:
+                    if event.key == pygame.K_ESCAPE:
+                        active_game = False
+                        victory = False
+                        blurred_background = None
+
+                if victory or game_over:
+                    if event.key == pygame.K_BACKSPACE:
+                        name_user = name_user[:-1]
+                    if len(name_user) < 10\
+                            and (event.unicode.isalnum() or event.unicode == ' '):
+                        name_user += event.unicode
+
+                    if event.key == pygame.K_RETURN:
+                        pressed += 1
+                        active_game = store_score(name_user)
+
+                if cheat_mod:
+                    if event.key == pygame.K_p:
+                        for i in range(len(pacgum)):
+                            score += verif.score_pacgum
+                        for j in range(len(superpacgum)):
+                            score += verif.score_superpacgum
+                        pacgum = set()
+                        superpacgum = set()
+                    if event.key == pygame.K_LCTRL:
+                        cheat_mod = False
+
+        if active_game:
+            if pause:
+                blurred_background = pause_screen(blurred_background)
+                continue
             if game_over:
-                if event.key == pygame.K_ESCAPE:
-                    active_game = False
-                    game_over = False
-                    blurred_background = None
-
+                blurred_background = game_over_screen(blurred_background)
+                continue
             if victory:
-                if event.key == pygame.K_ESCAPE:
-                    active_game = False
-                    victory = False
-                    blurred_background = None
+                blurred_background = victory_screen(blurred_background)
+                continue
+            count += 1
+            timer = verif.max_time + start_time - int(time())
+            clock.tick(30)
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_a] or keys[pygame.K_LEFT]:
+                next_dir = 7
+            if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+                next_dir = 13
+            if keys[pygame.K_w] or keys[pygame.K_UP]:
+                next_dir = 14
+            if keys[pygame.K_s] or keys[pygame.K_DOWN]:
+                next_dir = 11
+            if keys[pygame.K_t]:
+                run = False
+            p1.move(next_dir, wall)
+            if int(time()) - g1.death_timer > 3 and g1.scared == 0:
+                g1.move(p1.X, p1.Y, wall)
+            elif g1.scared == 1:
+                g1.flee(p1.X, p1.Y, wall)
+            if int(time()) - g2.death_timer > 3 and g2.scared == 0:
+                g2.move(p1.X, p1.Y, wall)
+            elif g2.scared == 1:
+                g2.flee(p1.X, p1.Y, wall)
+            if int(time()) - g3.death_timer > 3 and g3.scared == 0:
+                g3.move(p1.X, p1.Y, wall)
+            elif g3.scared == 1:
+                g3.flee(p1.X, p1.Y, wall)
+            if int(time()) - g4.death_timer > 3 and g4.scared == 0:
+                g4.move(p1.X, p1.Y, wall)
+            elif g4.scared == 1:
+                g4.flee(p1.X, p1.Y, wall)
 
-            if victory or game_over:
-                if event.key == pygame.K_BACKSPACE:
-                    name_user = name_user[:-1]
-                if len(name_user) < 10\
-                        and (event.unicode.isalnum() or event.unicode == ' '):
-                    name_user += event.unicode
-
-                if event.key == pygame.K_RETURN:
-                    pressed += 1
-                    active_game = store_score(name_user)
-
-            if cheat_mod:
-                if event.key == pygame.K_p:
-                    for i in range(len(pacgum)):
-                        score += verif.score_pacgum
-                    for j in range(len(superpacgum)):
-                        score += verif.score_superpacgum
-                    pacgum = set()
-                    superpacgum = set()
-                if event.key == pygame.K_LCTRL:
-                    cheat_mod = False
-
-    if active_game:
-        if pause:
-            blurred_background = pause_screen(blurred_background)
-            continue
-        if game_over:
-            blurred_background = game_over_screen(blurred_background)
-            continue
-        if victory:
-            blurred_background = victory_screen(blurred_background)
-            continue
-        count += 1
-        timer = verif.max_time + start_time - int(time())
-        clock.tick(30)
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_a] or keys[pygame.K_LEFT]:
-            next_dir = 7
-        if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-            next_dir = 13
-        if keys[pygame.K_w] or keys[pygame.K_UP]:
-            next_dir = 14
-        if keys[pygame.K_s] or keys[pygame.K_DOWN]:
-            next_dir = 11
-        if keys[pygame.K_t]:
-            run = False
-        p1.move(next_dir, wall)
-        if int(time()) - g1.death_timer > 3 and g1.scared == 0:
-            g1.move(p1.X, p1.Y, wall)
-        elif g1.scared == 1:
-            g1.flee(p1.X, p1.Y, wall)
-        if int(time()) - g2.death_timer > 3 and g2.scared == 0:
-            g2.move(p1.X, p1.Y, wall)
-        elif g2.scared == 1:
-            g2.flee(p1.X, p1.Y, wall)
-        if int(time()) - g3.death_timer > 3 and g3.scared == 0:
-            g3.move(p1.X, p1.Y, wall)
-        elif g3.scared == 1:
-            g3.flee(p1.X, p1.Y, wall)
-        if int(time()) - g4.death_timer > 3 and g4.scared == 0:
-            g4.move(p1.X, p1.Y, wall)
-        elif g4.scared == 1:
-            g4.flee(p1.X, p1.Y, wall)
-
-        windows.fill((0, 0, 0))
-        timer_surface = time_font.render(f"{timer}", False, (64, 64, 64))
-        timer_rect = timer_surface.get_rect(
-            center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
-        timer_surface.set_alpha(128)
-        windows.blit(timer_surface, timer_rect)
-        show_maze()
-        show_pacgum(pacgum)
-        show_superpacgum(superpacgum)
-
-        pac_x = int((p1.x + p1.sprite.get_width() / 2) // CELL_SIZE)
-        pac_y = int((p1.y + p1.sprite.get_height() / 2) // CELL_SIZE)
-
-        if (pac_x, pac_y) in pacgum:
-            score += verif.score_pacgum
-            pacgum.remove((pac_x, pac_y))
+            windows.fill((0, 0, 0))
+            timer_surface = time_font.render(f"{timer}", False, (64, 64, 64))
+            timer_rect = timer_surface.get_rect(
+                center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
+            timer_surface.set_alpha(128)
+            windows.blit(timer_surface, timer_rect)
+            show_maze()
             show_pacgum(pacgum)
-
-        if (pac_x, pac_y) in superpacgum:
-            score += verif.score_superpacgum
-            g1.scared = 1
-            g2.scared = 1
-            g3.scared = 1
-            g4.scared = 1
-            time_inv = int(time())
-            superpacgum.remove((pac_x, pac_y))
             show_superpacgum(superpacgum)
-        if int(time()) - time_inv == 5:
-            g1.scared = 0
-            g2.scared = 0
-            g3.scared = 0
-            g4.scared = 0
-        if pacgum == set() and superpacgum == set():
+
+            pac_x = int((p1.x + p1.sprite.get_width() / 2) // CELL_SIZE)
+            pac_y = int((p1.y + p1.sprite.get_height() / 2) // CELL_SIZE)
+
+            if (pac_x, pac_y) in pacgum:
+                score += verif.score_pacgum
+                pacgum.remove((pac_x, pac_y))
+                show_pacgum(pacgum)
+
+            if (pac_x, pac_y) in superpacgum:
+                score += verif.score_superpacgum
+                g1.scared = 1
+                g2.scared = 1
+                g3.scared = 1
+                g4.scared = 1
+                time_inv = int(time())
+                superpacgum.remove((pac_x, pac_y))
+                show_superpacgum(superpacgum)
+            if int(time()) - time_inv == 5:
+                g1.scared = 0
+                g2.scared = 0
+                g3.scared = 0
+                g4.scared = 0
+            if pacgum == set() and superpacgum == set():
+                maze = MazeGenerator((verif.width, verif.height))
+                maze.generate()
+                wall = maze.maze
+                resetall()
+                next_dir = 0
+                pacgum = create_pacgum(wall)
+                superpacgum = create_superpacgum()
+                level += 1
+                start_time = int(time())
+                if level - 1 == verif.level:
+                    victory = True
+                    continue
+
+            if p1.collide(g1.x, g1.y) and int(time()) - g1.death_timer > 3:
+                if g1.scared == 0:
+                    verif.lives = verif.lives - 1
+                    if verif.lives == 0:
+                        game_over = True
+                        continue
+                    resetall()
+                    next_dir = 0
+                else:
+                    score += verif.score_ghost
+                    g1.reset()
+                    g1.death_timer = int(time())
+            if p1.collide(g2.x, g2.y) and int(time()) - g2.death_timer > 3:
+                if g2.scared == 0:
+                    verif.lives = verif.lives - 1
+                    if verif.lives == 0:
+                        game_over = True
+                        continue
+                    resetall()
+                    next_dir = 0
+                else:
+                    score += verif.score_ghost
+                    g2.reset()
+                    g2.death_timer = int(time())
+            if p1.collide(g3.x, g3.y) and int(time()) - g3.death_timer > 3:
+                if g3.scared == 0:
+                    verif.lives = verif.lives - 1
+                    if verif.lives == 0:
+                        game_over = True
+                        continue
+                    resetall()
+                    next_dir = 0
+                else:
+                    score += verif.score_ghost
+                    g3.reset()
+                    g3.death_timer = int(time())
+            if p1.collide(g4.x, g4.y) and int(time()) - g4.death_timer > 3:
+                if g4.scared == 0:
+                    verif.lives = verif.lives - 1
+                    if verif.lives == 0:
+                        game_over = True
+                        continue
+                    resetall()
+                    next_dir = 0
+                else:
+                    score += verif.score_ghost
+                    g4.reset()
+                    g4.death_timer = int(time())
+            if timer == 0:
+                game_over = True
+                continue
+            windows.blit(p1.choose_dir(p1.frames[count % 8], p1.dir), (p1.x, p1.y))
+            if int(time()) - g1.death_timer > 3:
+                g1.show(count, windows)
+            if int(time()) - g2.death_timer > 3:
+                g2.show(count, windows)
+            if int(time()) - g3.death_timer > 3:
+                g3.show(count, windows)
+            if int(time()) - g4.death_timer > 3:
+                g4.show(count, windows)
+            score_surface = font_text.render(f"{score}", False, (64, 64, 64))
+            score_rect = score_surface.get_rect(bottomright=(990, 1050))
+            windows.blit(score_surface, score_rect)
+            life_text = font_text.render(
+                f"Life: {verif.lives}", False, (64, 64, 64))
+            life_rect = life_text.get_rect(midbottom=(SCREEN_WIDTH/2, 1050))
+            windows.blit(life_text, life_rect)
+            current_level = font_text.render(
+                f"Level: {level}", False, (64, 64, 64))
+            current_level_rect = current_level.get_rect(bottomleft=(5, 1050))
+            windows.blit(current_level, current_level_rect)
+            pygame.display.flip()
+        else:
             maze = MazeGenerator((verif.width, verif.height))
-            maze.generate()
+            maze.generate(verif.seed)
             wall = maze.maze
             resetall()
             next_dir = 0
             pacgum = create_pacgum(wall)
             superpacgum = create_superpacgum()
-            level += 1
+            score = 0
+            verif.lives = initial_lives
+            level = 1
             start_time = int(time())
-            if level - 1 == verif.level:
-                victory = True
-                continue
-
-        if p1.collide(g1.x, g1.y) and int(time()) - g1.death_timer > 3:
-            if g1.scared == 0:
-                verif.lives = verif.lives - 1
-                if verif.lives == 0:
-                    game_over = True
-                    continue
-                resetall()
-                next_dir = 0
-            else:
-                score += verif.score_ghost
-                g1.reset()
-                g1.death_timer = int(time())
-        if p1.collide(g2.x, g2.y) and int(time()) - g2.death_timer > 3:
-            if g2.scared == 0:
-                verif.lives = verif.lives - 1
-                if verif.lives == 0:
-                    game_over = True
-                    continue
-                resetall()
-                next_dir = 0
-            else:
-                score += verif.score_ghost
-                g2.reset()
-                g2.death_timer = int(time())
-        if p1.collide(g3.x, g3.y) and int(time()) - g3.death_timer > 3:
-            if g3.scared == 0:
-                verif.lives = verif.lives - 1
-                if verif.lives == 0:
-                    game_over = True
-                    continue
-                resetall()
-                next_dir = 0
-            else:
-                score += verif.score_ghost
-                g3.reset()
-                g3.death_timer = int(time())
-        if p1.collide(g4.x, g4.y) and int(time()) - g4.death_timer > 3:
-            if g4.scared == 0:
-                verif.lives = verif.lives - 1
-                if verif.lives == 0:
-                    game_over = True
-                    continue
-                resetall()
-                next_dir = 0
-            else:
-                score += verif.score_ghost
-                g4.reset()
-                g4.death_timer = int(time())
-        if timer == 0:
-            game_over = True
-            continue
-        windows.blit(p1.choose_dir(p1.frames[count % 8], p1.dir), (p1.x, p1.y))
-        if int(time()) - g1.death_timer > 3:
-            g1.show(count, windows)
-        if int(time()) - g2.death_timer > 3:
-            g2.show(count, windows)
-        if int(time()) - g3.death_timer > 3:
-            g3.show(count, windows)
-        if int(time()) - g4.death_timer > 3:
-            g4.show(count, windows)
-        score_surface = font_text.render(f"{score}", False, (64, 64, 64))
-        score_rect = score_surface.get_rect(bottomright=(990, 1050))
-        windows.blit(score_surface, score_rect)
-        life_text = font_text.render(
-            f"Life: {verif.lives}", False, (64, 64, 64))
-        life_rect = life_text.get_rect(midbottom=(SCREEN_WIDTH/2, 1050))
-        windows.blit(life_text, life_rect)
-        current_level = font_text.render(
-            f"Level: {level}", False, (64, 64, 64))
-        current_level_rect = current_level.get_rect(bottomleft=(5, 1050))
-        windows.blit(current_level, current_level_rect)
-        pygame.display.flip()
-    else:
-        maze = MazeGenerator((verif.width, verif.height))
-        maze.generate(verif.seed)
-        wall = maze.maze
-        resetall()
-        next_dir = 0
-        pacgum = create_pacgum(wall)
-        superpacgum = create_superpacgum()
-        score = 0
-        verif.lives = initial_lives
-        level = 1
-        start_time = int(time())
-        victory = False
-        game_over = False
-        name_user = ""
-        pressed = 0
-        cheat_mod = False
-        main_menu()
-        if instruction:
-            instruction_screen()
-        if highscore:
-            highscore_screen(content)
-    pygame.display.update()
-pygame.quit()
+            victory = False
+            game_over = False
+            name_user = ""
+            pressed = 0
+            cheat_mod = False
+            main_menu()
+            if instruction:
+                instruction_screen()
+            if highscore:
+                highscore_screen(content)
+        pygame.display.update()
+    pygame.quit()
