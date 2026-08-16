@@ -531,3 +531,7 @@ The following resources were used as references during the development of the pr
 AI tools were also used to explain Pygame concepts and assist with README preparation, as described in the **AI Usage** section.
 
 ---
+
+# Project packaging
+
+link to the site: https://malikcorentin.itch.io/pac-man
